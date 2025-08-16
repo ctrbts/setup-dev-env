@@ -13,12 +13,10 @@
   vars:
     username: "{{ ansible_user_id }}"
     asdf_install_dir: "{{ ansible_env.HOME }}/.asdf"
-    asdf_version: "v0.18.0"
     asdf_plugins:
       - name: python
       - name: php
       - name: nodejs
-      - name: composer
 
     flatpak_gui_apps: # Se pueden agregar mas app necesarias
       - org.mozilla.firefox
@@ -110,7 +108,7 @@
         msg: "Tareas de eliminación de Snap ejecutadas."
 
     # --------------------------------------------------------------------------
-    # FASE 4: Configuración de Repositorios APT (Chrome, VSCode, Docker)
+    # FASE 4: Configuración de Repositorios APT (Chrome, Docker)
     # --------------------------------------------------------------------------
     - name: 4.1 - Instalar paquetes esenciales y dependencias
       ansible.builtin.apt:
@@ -122,11 +120,11 @@
           - ca-certificates
           - gnupg
           - zsh
-          - htop
           - ncdu
           - unzip
           - flatpak
           - gnome-software-plugin-flatpak
+          - gnome-shell-extensions
           - sqlitebrowser
           - libssl-dev
           - zlib1g-dev
@@ -163,20 +161,7 @@
             filename: google-chrome
             update_cache: no
 
-    - name: 4.4 - Añadir llave GPG y repositorio de VS Code
-      block:
-        - name: Añadir llave GPG de Microsoft
-          ansible.builtin.shell: "curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/keyrings/packages.microsoft.gpg"
-          args:
-            creates: /etc/apt/keyrings/packages.microsoft.gpg
-        - name: Añadir repositorio de VS Code
-          ansible.builtin.apt_repository:
-            repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main"
-            state: present
-            filename: vscode
-            update_cache: no
-
-    - name: 4.5 - Añadir llave GPG y repositorio de Docker
+    - name: 4.4 - Añadir llave GPG y repositorio de Docker
       block:
         - name: Añadir llave GPG de Docker
           ansible.builtin.shell: "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg"
@@ -184,29 +169,45 @@
             creates: /etc/apt/keyrings/docker.gpg
         - name: Añadir repositorio de Docker
           ansible.builtin.apt_repository:
-            # --- MODIFICACIÓN CLAVE ---
-            # Ahora usa la variable de Ansible que detecta la versión del SO.
             repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
             state: present
             filename: docker
             update_cache: no
 
-    - name: 4.6 - Actualizar la caché de APT después de añadir todos los repositorios
+    - name: 4.5 - Actualizar la caché de APT después de añadir todos los repositorios
       ansible.builtin.apt:
         update_cache: yes
 
-    - name: 4.7 - Tareas completadas
+    - name: 4.6 - Tareas completadas
       ansible.builtin.debug:
         msg: "Repositorios de terceros configurados."
 
     # --------------------------------------------------------------------------
-    # FASE 5: Instalación de Software desde APT
+    # FASE 5: Instalación de VS Code (Método .deb)
     # --------------------------------------------------------------------------
-    - name: 5.1 - Instalar software desde los repositorios configurados
+    - name: 5.1 - Descargar el paquete .deb de Visual Studio Code
+      ansible.builtin.get_url:
+        url: "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64"
+        dest: "/tmp/vscode.deb"
+        mode: '0644'
+
+    - name: 5.2 - Instalar Visual Studio Code desde el paquete .deb
+      ansible.builtin.apt:
+        deb: "/tmp/vscode.deb"
+      become: yes
+
+    - name: 5.3 - Limpiar el paquete .deb descargado
+      ansible.builtin.file:
+        path: "/tmp/vscode.deb"
+        state: absent
+
+    # --------------------------------------------------------------------------
+    # FASE 6: Instalación de Software desde APT
+    # --------------------------------------------------------------------------
+    - name: 6.1 - Instalar software desde los repositorios configurados
       ansible.builtin.apt:
         name:
           - google-chrome-stable
-          - code
           - docker-ce
           - docker-ce-cli
           - containerd.io
@@ -215,58 +216,104 @@
         state: present
 
     # --------------------------------------------------------------------------
-    # FASE 6: Configuración de Flatpak y Aplicaciones GUI
+    # FASE 7: Configuración de la Shell (Zsh y Oh My Zsh)
     # --------------------------------------------------------------------------
-    - name: 6.1 - Añadir el repositorio Flathub
+    - name: 7.1 - Cambiar la shell por defecto del usuario a Zsh
+      ansible.builtin.user:
+        name: "{{ username }}"
+        shell: /bin/zsh
+      become: yes
+
+    - name: 7.2 - Instalar Oh My Zsh
+      ansible.builtin.shell: 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
+      args:
+        creates: "{{ ansible_env.HOME }}/.oh-my-zsh"
+      become_user: "{{ username }}"
+      vars:
+        ansible_become: no
+
+    - name: 7.3 - Instalar plugins de Zsh (externos)
+      ansible.builtin.git:
+        repo: "{{ item.repo }}"
+        dest: "{{ item.dest }}"
+      loop:
+        - { repo: 'https://github.com/zsh-users/zsh-autosuggestions.git', dest: "{{ ansible_env.HOME }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions" }
+        - { repo: 'https://github.com/zsh-users/zsh-syntax-highlighting.git', dest: "{{ ansible_env.HOME }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" }
+      become_user: "{{ username }}"
+      vars:
+        ansible_become: no
+
+    - name: 7.4 - Activar plugins en el archivo .zshrc
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_env.HOME }}/.zshrc"
+        regexp: '^plugins=\(.*\)$'
+        line: 'plugins=(git common-aliases extract colored-man-pages zsh-autosuggestions zsh-syntax-highlighting)'
+        backrefs: yes
+      become_user: "{{ username }}"
+      vars:
+        ansible_become: no
+
+    # --------------------------------------------------------------------------
+    # FASE 8: Configuración de Flatpak y Aplicaciones GUI
+    # --------------------------------------------------------------------------
+    - name: 8.1 - Añadir el repositorio Flathub
       community.general.flatpak_remote:
         name: flathub
         state: present
         flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
 
-    - name: 6.2 - Instalar todas las aplicaciones GUI desde Flathub
+    - name: 8.2 - Instalar todas las aplicaciones GUI desde Flathub
       community.general.flatpak:
         name: "{{ flatpak_gui_apps }}"
         state: present
 
     # --------------------------------------------------------------------------
-    # FASE 7: Entorno de Desarrollo (Docker, ASDF, etc.)
+    # FASE 9: Entorno de Desarrollo (Docker, ASDF, etc.)
     # --------------------------------------------------------------------------
-    - name: 7.1 - Añadir usuario actual al grupo 'docker'
+    - name: 9.1 - Añadir usuario actual al grupo 'docker'
       ansible.builtin.user:
         name: "{{ username }}"
         groups: docker
         append: yes
       notify: Show Docker Logout Message
 
-    - name: 7.2 - Instalar asdf (clonar repositorio)
+    - name: 9.2 - Instalar asdf (versión Go)
       ansible.builtin.git:
         repo: "https://github.com/asdf-vm/asdf.git"
         dest: "{{ asdf_install_dir }}"
-        version: "{{ asdf_version }}"
-      become: no
+      become_user: "{{ username }}"
+      vars:
+        ansible_become: no
 
-    - name: 7.3 - Añadir asdf al .bashrc para que esté disponible en la shell
+    - name: 9.3 - Eliminar la configuración antigua de asdf de .zshrc
       ansible.builtin.lineinfile:
-        path: "{{ ansible_env.HOME }}/.bashrc"
-        line: ". {{ asdf_install_dir }}/asdf.sh"
-        create: yes
-        regexp: "^. {{ asdf_install_dir }}/asdf.sh"
-      become: no
+        path: "{{ ansible_env.HOME }}/.zshrc"
+        regexp: '^\. .*/\.asdf/asdf\.sh$'
+        state: absent
+      become_user: "{{ username }}"
+      vars:
+        ansible_become: no
 
-    - name: 7.4 - Añadir plugins de asdf
-      ansible.builtin.command: "{{ asdf_install_dir }}/bin/asdf plugin add {{ item.name }}"
+    - name: 9.4 - Configurar la shell para asdf (método Go)
+      ansible.builtin.blockinfile:
+        path: "{{ ansible_env.HOME }}/.zshrc"
+        block: |
+          # --- ASDF (Go Version) ---
+          export ASDF_DATA_DIR={{ asdf_install_dir }}
+          export PATH="$ASDF_DATA_DIR/shims:$PATH"
+        marker: "# {mark} ANSIBLE MANAGED BLOCK FOR ASDF"
+      become_user: "{{ username }}"
+      vars:
+        ansible_become: no
+
+    - name: 9.5 - Añadir plugins de asdf
+      ansible.builtin.command: "{{ ansible_env.HOME }}/.asdf/bin/asdf plugin add {{ item.name }}"
       args:
         creates: "{{ asdf_install_dir }}/plugins/{{ item.name }}"
       loop: "{{ asdf_plugins }}"
-      become: no
-
-    - name: 7.5 - Sincronizar llaves GPG del plugin de Node.js
-      ansible.builtin.shell: |
-        bash {{ asdf_install_dir }}/plugins/nodejs/bin/asdf-nodejs-source-ins
-      args:
-        executable: /bin/bash
-      become: no
-      changed_when: false
+      become_user: "{{ username }}"
+      vars:
+        ansible_become: no
 
   # --- Handlers ---
   handlers:
