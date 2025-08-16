@@ -1,12 +1,8 @@
----
 # ==============================================================================
 # Playbook de Ansible por SysCraft para Configurar una Workstation de Desarrollo
 #
-# VERSIÓN 2: Añadida la erradicación completa de Snap y la instalación de
-# Firefox desde el PPA de Mozilla para un sistema base limpio.
-#
 # Ejecución:
-# ansible-playbook -i inventory.ini playbook.yml
+# sudo ansible-playbook -i inventory.ini playbook.yml
 # ==============================================================================
 
 - name: 🚀 Configurar Workstation de Desarrollo Completa (Sin Snap)
@@ -17,46 +13,77 @@
   vars:
     username: "{{ ansible_user_id }}"
     asdf_install_dir: "{{ ansible_env.HOME }}/.asdf"
-    asdf_version: "v0.14.0"
+    asdf_version: "v0.18.0"
     asdf_plugins:
       - name: python
       - name: php
       - name: nodejs
       - name: composer
 
+    flatpak_gui_apps: # Se pueden agregar mas app necesarias
+      - org.mozilla.firefox
+      - org.videolan.VLC
+      - io.dbeaver.DBeaverCommunity
+      - org.gnome.Boxes
+      - org.gimp.GIMP
+      - org.inkscape.Inkscape
+
   tasks:
     # --------------------------------------------------------------------------
-    # FASE 1: Actualización del Sistema Base
+    # FASE 1: Limpieza del Sistema
     # --------------------------------------------------------------------------
-    - name: 1.1 - Actualizar caché de APT y realizar upgrade completo del sistema
+    - name: 1.1 - Limpiar configuraciones previas para evitar conflictos
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/apt/sources.list.d/vscode.list
+        - /usr/share/keyrings/microsoft.gpg
+        - /etc/apt/sources.list.d/google-chrome.list
+        - /etc/apt/sources.list.d/docker.list
+
+    - name: 1.2 - Asegurarse de que las líneas de repositorios no están en sources.list
+      ansible.builtin.lineinfile:
+        path: /etc/apt/sources.list
+        state: absent
+        regexp: "{{ item }}"
+      loop:
+        - '.*packages.microsoft.com/repos/code.*'
+        - '.*dl.google.com/linux/chrome/deb.*'
+        - '.*download.docker.com/linux/ubuntu.*'
+
+    # --------------------------------------------------------------------------
+    # FASE 2: Actualización del Sistema Base
+    # --------------------------------------------------------------------------
+    - name: 2.1 - Actualizar caché de APT y realizar upgrade completo del sistema
       ansible.builtin.apt:
         update_cache: yes
         upgrade: dist
         cache_valid_time: 3600
 
     # --------------------------------------------------------------------------
-    # FASE 2: Erradicación Completa de Snap
+    # FASE 3: Erradicación Completa de Snap
     # --------------------------------------------------------------------------
-    - name: 2.1 - Obtener la lista de snaps instalados
+    - name: 3.1 - Obtener la lista de snaps instalados
       ansible.builtin.command: snap list
       register: installed_snaps_raw
       changed_when: false
-      failed_when: false # No fallar si snapd no está instalado
+      failed_when: false
 
-    - name: 2.2 - Desinstalar todos los paquetes snap existentes
+    - name: 3.2 - Desinstalar todos los paquetes snap existentes
       community.general.snap:
         name: "{{ item.split(' ')[0] }}"
         state: absent
-      loop: "{{ installed_snaps_raw.stdout_lines[1:] }}" # Omitir la línea de cabecera
+      loop: "{{ installed_snaps_raw.stdout_lines[1:] }}"
       when: installed_snaps_raw.rc == 0
 
-    - name: 2.3 - Purgar el paquete snapd del sistema
+    - name: 3.3 - Purgar el paquete snapd del sistema
       ansible.builtin.apt:
         name: snapd
         state: absent
         purge: yes
 
-    - name: 2.4 - Eliminar directorios residuales de snap
+    - name: 3.4 - Eliminar directorios residuales de snap
       ansible.builtin.file:
         path: "{{ item }}"
         state: absent
@@ -67,9 +94,9 @@
         - /var/lib/snapd
       become_user: "{{ username }}"
       vars:
-        ansible_become: no # Ejecutar esta tarea como el usuario para eliminar ~/snap
+        ansible_become: no
 
-    - name: 2.5 - Bloquear la reinstalación de snapd vía APT
+    - name: 3.5 - Bloquear la reinstalación de snapd vía APT
       ansible.builtin.copy:
         dest: /etc/apt/preferences.d/no-snap.pref
         content: |
@@ -78,10 +105,14 @@
           Pin-Priority: -1
         mode: '0644'
 
+    - name: 3.6 - Eliminación Completa de Snap (tareas de debug)
+      ansible.builtin.debug:
+        msg: "Tareas de eliminación de Snap ejecutadas."
+
     # --------------------------------------------------------------------------
-    # FASE 3: Configuración de Repositorios APT (Chrome, VSCode, Docker, Mozilla)
+    # FASE 4: Configuración de Repositorios APT (Chrome, VSCode, Docker)
     # --------------------------------------------------------------------------
-    - name: 3.1 - Instalar paquetes esenciales y dependencias de compilación
+    - name: 4.1 - Instalar paquetes esenciales y dependencias
       ansible.builtin.apt:
         name:
           - build-essential
@@ -113,52 +144,67 @@
           - liblzma-dev
         state: present
 
-    - name: 3.2 - Crear el directorio para llaves GPG de APT
+    - name: 4.2 - Asegurarse de que el directorio /etc/apt/keyrings existe
       ansible.builtin.file:
         path: /etc/apt/keyrings
         state: directory
         mode: '0755'
 
-    - name: 3.3 - Añadir repositorio de Google Chrome
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main"
-        state: present
-        filename: google-chrome
-      # (Se asume que la llave ya fue añadida en una tarea anterior o manualmente)
+    - name: 4.3 - Añadir llave GPG y repositorio de Google Chrome
+      block:
+        - name: Añadir llave GPG de Google
+          ansible.builtin.shell: "curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg"
+          args:
+            creates: /etc/apt/keyrings/google-chrome.gpg
+        - name: Añadir repositorio de Google Chrome
+          ansible.builtin.apt_repository:
+            repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main"
+            state: present
+            filename: google-chrome
+            update_cache: no
 
-    - name: 3.4 - Añadir repositorio de VS Code
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main"
-        state: present
-        filename: vscode
+    - name: 4.4 - Añadir llave GPG y repositorio de VS Code
+      block:
+        - name: Añadir llave GPG de Microsoft
+          ansible.builtin.shell: "curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/keyrings/packages.microsoft.gpg"
+          args:
+            creates: /etc/apt/keyrings/packages.microsoft.gpg
+        - name: Añadir repositorio de VS Code
+          ansible.builtin.apt_repository:
+            repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main"
+            state: present
+            filename: vscode
+            update_cache: no
 
-    - name: 3.5 - Añadir repositorio de Docker
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-        state: present
-        filename: docker
+    - name: 4.5 - Añadir llave GPG y repositorio de Docker
+      block:
+        - name: Añadir llave GPG de Docker
+          ansible.builtin.shell: "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg"
+          args:
+            creates: /etc/apt/keyrings/docker.gpg
+        - name: Añadir repositorio de Docker
+          ansible.builtin.apt_repository:
+            # --- MODIFICACIÓN CLAVE ---
+            # Ahora usa la variable de Ansible que detecta la versión del SO.
+            repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+            state: present
+            filename: docker
+            update_cache: no
 
-    - name: 3.6 - Añadir PPA de Mozilla Team para Firefox
-      ansible.builtin.apt_repository:
-        repo: ppa:mozillateam/ppa
-        state: present
+    - name: 4.6 - Actualizar la caché de APT después de añadir todos los repositorios
+      ansible.builtin.apt:
+        update_cache: yes
 
-    - name: 3.7 - Dar prioridad al PPA de Mozilla para evitar el snap de Firefox
-      ansible.builtin.copy:
-        dest: /etc/apt/preferences.d/mozilla-firefox.pref
-        content: |
-          Package: *
-          Pin: release o=LP-PPA-mozillateam
-          Pin-Priority: 1001
-        mode: '0644'
+    - name: 4.7 - Tareas completadas
+      ansible.builtin.debug:
+        msg: "Repositorios de terceros configurados."
 
     # --------------------------------------------------------------------------
-    # FASE 4: Instalación de Software desde APT
+    # FASE 5: Instalación de Software desde APT
     # --------------------------------------------------------------------------
-    - name: 4.1 - Instalar software desde los repositorios configurados
+    - name: 5.1 - Instalar software desde los repositorios configurados
       ansible.builtin.apt:
         name:
-          - firefox # Ahora se instalará desde el PPA de Mozilla
           - google-chrome-stable
           - code
           - docker-ce
@@ -167,19 +213,62 @@
           - docker-buildx-plugin
           - docker-compose-plugin
         state: present
-        update_cache: yes
 
-    # ... (El resto del playbook para Docker user, Flatpak, ASDF, etc., continúa desde aquí sin cambios) ...
+    # --------------------------------------------------------------------------
+    # FASE 6: Configuración de Flatpak y Aplicaciones GUI
+    # --------------------------------------------------------------------------
+    - name: 6.1 - Añadir el repositorio Flathub
+      community.general.flatpak_remote:
+        name: flathub
+        state: present
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
 
-    - name: 4.2 - Añadir usuario actual al grupo 'docker'
+    - name: 6.2 - Instalar todas las aplicaciones GUI desde Flathub
+      community.general.flatpak:
+        name: "{{ flatpak_gui_apps }}"
+        state: present
+
+    # --------------------------------------------------------------------------
+    # FASE 7: Entorno de Desarrollo (Docker, ASDF, etc.)
+    # --------------------------------------------------------------------------
+    - name: 7.1 - Añadir usuario actual al grupo 'docker'
       ansible.builtin.user:
         name: "{{ username }}"
         groups: docker
         append: yes
       notify: Show Docker Logout Message
 
-    # ... (Resto de las fases 5 y 6) ...
+    - name: 7.2 - Instalar asdf (clonar repositorio)
+      ansible.builtin.git:
+        repo: "https://github.com/asdf-vm/asdf.git"
+        dest: "{{ asdf_install_dir }}"
+        version: "{{ asdf_version }}"
+      become: no
 
+    - name: 7.3 - Añadir asdf al .bashrc para que esté disponible en la shell
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_env.HOME }}/.bashrc"
+        line: ". {{ asdf_install_dir }}/asdf.sh"
+        create: yes
+        regexp: "^. {{ asdf_install_dir }}/asdf.sh"
+      become: no
+
+    - name: 7.4 - Añadir plugins de asdf
+      ansible.builtin.command: "{{ asdf_install_dir }}/bin/asdf plugin add {{ item.name }}"
+      args:
+        creates: "{{ asdf_install_dir }}/plugins/{{ item.name }}"
+      loop: "{{ asdf_plugins }}"
+      become: no
+
+    - name: 7.5 - Sincronizar llaves GPG del plugin de Node.js
+      ansible.builtin.shell: |
+        bash {{ asdf_install_dir }}/plugins/nodejs/bin/asdf-nodejs-source-ins
+      args:
+        executable: /bin/bash
+      become: no
+      changed_when: false
+
+  # --- Handlers ---
   handlers:
     - name: Show Docker Logout Message
       ansible.builtin.debug:
