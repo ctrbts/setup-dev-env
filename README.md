@@ -2,4 +2,4 @@ Para configurar una máquina nueva ejecute el comando de abajo. Esto descargará
 
 ### One-click setup
 
-    sh -c "$(curl -fsSL https://github.com/ctrbts/setup-dev-env/blob/main/bootstrap.sh)"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/refs/heads/main/bootstrap.sh?token=GHSAT0AAAAAADJNP3STUJKMZ6FAZ4CWFBSO2FEVF2Q)"
