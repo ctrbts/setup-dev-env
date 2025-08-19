@@ -70,21 +70,23 @@ cleanup_previous_configs() {
 # 2. Erradicación completa de Snap.
 remove_snap() {
     _log "Fase 2: Erradicando SnapD del sistema"
-    # Si snapd no está instalado, salta esta sección
     if ! command -v snap &> /dev/null; then
         _success "Snapd no está instalado. Omitiendo."
         return
     fi
 
-    # Desinstalar todos los snaps
-    for snap in $(snap list | awk '!/^Name/{print $1}'); do
-        sudo snap remove "$snap"
+    # Bucle que se ejecuta mientras queden snaps instalados.
+    # Intenta eliminar todos los snaps en cada pasada. Los que fallen por
+    # dependencias se eliminarán en pasadas posteriores.
+    while [ -n "$(snap list | awk '!/^Name/{print $1}')" ]; do
+        for snap in $(snap list | awk '!/^Name/{print $1}'); do
+            sudo snap remove "$snap" 2>/dev/null || true
+        done
     done
 
     sudo apt purge snapd -y
     sudo rm -rf "$USER_HOME/snap" /snap /var/snap /var/lib/snapd
     
-    # Bloquear reinstalación
     cat <<EOF | sudo tee /etc/apt/preferences.d/no-snap.pref
 Package: snapd
 Pin: release *
