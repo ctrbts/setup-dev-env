@@ -184,7 +184,7 @@ setup_zsh() {
 # 7. Instala aplicaciones GUI vía Flatpak.
 install_flatpaks() {
     _log "Fase 7: Instalando aplicaciones GUI desde Flatpak"
-    sudo flatpak remote-add-if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     sudo flatpak install -y --noninteractive flathub "${FLATPAK_APPS[@]}"
     _success "Aplicaciones Flatpak instaladas."
 }
