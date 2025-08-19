@@ -16,7 +16,7 @@ set -o pipefail
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
 USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
 # Asume que el script se ejecuta desde la raíz del repositorio clonado
-REPO_DIR=$(pwd)
+REPO_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 # --- Listas de Paquetes (Fácil de modificar) ---
 APT_ESSENTIALS=(
@@ -45,7 +45,6 @@ _warning() { echo -e "${YELLOW}⚠️ $1${NC}"; }
 
 # --- Funciones de Lógica Principal ---
 
-# ... (Fases 1 a 5 se mantienen igual, omitidas por brevedad) ...
 # 1. Limpia configuraciones de repositorios previas para evitar conflictos.
 cleanup_previous_configs() {
     _log "Fase 1: Limpiando configuraciones de repositorios previas"
@@ -204,8 +203,9 @@ setup_dev_environment() {
         _log "Instalando asdf (versión Go)..."
         local asdf_version
         asdf_version=$(curl -s "https://api.github.com/repos/asdf-vm/asdf/releases/latest" | grep -oP '"tag_name": "\K(v[0-9\.]+)')
-        local asdf_tarball="asdf_${asdf_version}_linux_amd64.tar.gz"
+        local asdf_tarball="asdf-${asdf_version}-linux-amd64.tar.gz"
 
+        # https://github.com/asdf-vm/asdf/releases/download/v0.18.0/asdf-v0.18.0-linux-amd64.tar.gz
         wget -qO "/tmp/$asdf_tarball" "https://github.com/asdf-vm/asdf/releases/download/$asdf_version/$asdf_tarball"
         
         sudo -u "$SUDO_USER" mkdir -p "$asdf_data_dir/bin"
@@ -247,8 +247,8 @@ EOF
 setup_dotfiles() {
     _log "Fase 7: Configurando dotfiles personalizados"
     
-    local config_dir="$USER_HOME/.config/"
-    #sudo -u "$SUDO_USER" mkdir -p "$config_dir"
+    local config_dir="$USER_HOME/.config/zsh"
+    sudo -u "$SUDO_USER" mkdir -p "$config_dir"
 
     # Copiar archivos de configuración desde el repositorio
     sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/aliases.sh" "$config_dir/aliases.sh"
