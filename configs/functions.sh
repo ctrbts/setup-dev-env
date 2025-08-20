@@ -109,6 +109,7 @@ function clone_repo() {
         # Verificar si el clonado fue exitoso
         if [ $? -eq 0 ]; then
             echo "✅ Repositorio clonado exitosamente en: $target_dir"
+            cd "$target_dir" || echo "No se pudo cambiar al directorio clonado."
         else
             echo "❌ Error al clonar el repositorio."
             return 1

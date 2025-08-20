@@ -21,7 +21,7 @@ REPO_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 # --- Listas de Paquetes (Fácil de modificar) ---
 APT_ESSENTIALS=(
     build-essential git curl wget ca-certificates gnupg zsh ncdu unzip flatpak
-    gnome-software-plugin-flatpak gnome-shell-extensions sqlitebrowser php-cli
+    gnome-software-plugin-flatpak gnome-shell-extensions sqlitebrowser
     libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev llvm
     libncurses5-dev libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev
     libffi-dev liblzma-dev
@@ -247,12 +247,12 @@ EOF
 setup_dotfiles() {
     _log "Fase 7: Configurando dotfiles personalizados"
     
-    local config_dir="$USER_HOME/.config/zsh"
+    #local config_dir="$USER_HOME/.config/zsh"
     sudo -u "$SUDO_USER" mkdir -p "$config_dir"
 
     # Copiar archivos de configuración desde el repositorio
-    sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/aliases.sh" "$config_dir/aliases.sh"
-    sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/functions.sh" "$config_dir/functions.sh"
+    sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/aliases.sh" "$USER_HOME/.aliases.sh"
+    sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/functions.sh" "$USER_HOME/.functions.sh"
     
     # Reemplazar el .zshrc del usuario con nuestra versión personalizada
     sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/zshrc" "$USER_HOME/.zshrc"
