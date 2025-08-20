@@ -98,32 +98,31 @@ setup_apt_repos() {
     _log "Configurando repositorios APT de terceros"
     sudo install -m 0755 -d /etc/apt/keyrings
 
-    # Visual Studio Code   
-    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft.gpg
+    # Visual Studio Code
+    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --yes --dearmor -o /usr/share/keyrings/microsoft.gpg
     echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
 
     # Google Chrome
-    curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg
+    curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --yes --dearmor -o /etc/apt/keyrings/google-chrome.gpg
     echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
 
-    # DBeaver (serge-rider)
-    curl -fsSL https://dbeaver.io/debs/dbeaver.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/dbeaver.gpg
-    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/dbeaver.gpg] https://dbeaver.io/debs/ stable main" | sudo tee /etc/apt/sources.list.d/serge-rider-ubuntu-dbeaver-ce-plucky.list
+    # DBeaver Community Edition (URL y formato corregidos)
+    curl -fsSL https://dbeaver.io/debs/dbeaver.gpg.key | sudo gpg --yes --dearmor -o /etc/apt/keyrings/dbeaver.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/dbeaver.gpg] https://dbeaver.io/debs/dbeaver-ce /" | sudo tee /etc/apt/sources.list.d/dbeaver.list
 
     # Docker (con fallback a LTS)
     local ubuntu_codename
     ubuntu_codename=$(. /etc/os-release && echo "$VERSION_CODENAME")
     
-    # Comprobar si el repositorio existe para la versión actual
     if ! curl -fsSL "https://download.docker.com/linux/ubuntu/dists/$ubuntu_codename/" | grep -q "stable"; then
         _warning "No se encontró un repositorio de Docker para '$ubuntu_codename'. Usando fallback a 'noble' (LTS)."
         ubuntu_codename="noble"
     fi
 
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --yes --dearmor -o /etc/apt/keyrings/docker.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $ubuntu_codename stable" | sudo tee /etc/apt/sources.list.d/docker.list
 
-    _success "Repositorios de Chrome y Docker configurados."
+    _success "Repositorios de terceros configurados."
 }
 
 # 04. Instala todos los paquetes desde APT.
