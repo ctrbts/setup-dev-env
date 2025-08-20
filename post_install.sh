@@ -21,18 +21,16 @@ REPO_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 # --- Listas de Paquetes (Fácil de modificar) ---
 APT_ESSENTIALS=(
     build-essential git curl wget ca-certificates gnupg zsh ncdu unzip flatpak
-    gnome-software-plugin-flatpak gnome-shell-extensions sqlitebrowser
-    libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev llvm
-    libncurses5-dev libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev
-    libffi-dev liblzma-dev
+    gnome-software-plugin-flatpak gnome-shell-extensions libssl-dev zlib1g-dev 
+    libbz2-dev libreadline-dev libsqlite3-dev llvm libncurses5-dev 
+    libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
 )
 APT_APPS=(
-    google-chrome-stable docker-ce docker-ce-cli containerd.io
-    docker-buildx-plugin docker-compose-plugin
+    google-chrome-stable gnome-boxes sqlitebrowser dbeaver-ce code
+    docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 )
 FLATPAK_APPS=(
-    org.mozilla.firefox org.videolan.VLC io.dbeaver.DBeaverCommunity
-    org.gnome.Boxes org.gimp.GIMP org.inkscape.Inkscape
+    org.mozilla.firefox org.videolan.VLC org.gimp.GIMP org.inkscape.Inkscape
 )
 ASDF_PLUGINS=(
     python php nodejs
@@ -45,12 +43,13 @@ _warning() { echo -e "${YELLOW}⚠️ $1${NC}"; }
 
 # --- Funciones de Lógica Principal ---
 
-# 1. Limpia configuraciones de repositorios previas para evitar conflictos.
+# 01. Limpia configuraciones de repositorios previas para evitar conflictos.
 cleanup_previous_configs() {
-    _log "Fase 1: Limpiando configuraciones de repositorios previas"
+    _log "Limpiando configuraciones de repositorios previas"
     
     # Eliminar archivos de lista de repositorios
-    sudo rm -f /etc/apt/sources.list.d/vscode.list \
+    sudo rm -f /etc/apt/sources.list.d/vscode.sources \
+               /etc/apt/sources.list.d/serge-rider-ubuntu-dbeaver-ce-plucky.sources \
                /etc/apt/sources.list.d/google-chrome.list \
                /etc/apt/sources.list.d/docker.list
 
@@ -66,9 +65,9 @@ cleanup_previous_configs() {
     _success "Limpieza de configuraciones previas completada."
 }
 
-# 2. Erradicación completa de Snap.
+# 02. Erradicación completa de Snap.
 remove_snap() {
-    _log "Fase 2: Erradicando SnapD del sistema"
+    _log "Erradicando SnapD del sistema"
     if ! command -v snap &> /dev/null; then
         _success "Snapd no está instalado. Omitiendo."
         return
@@ -94,14 +93,22 @@ EOF
     _success "Snapd eliminado y bloqueado."
 }
 
-# 3. Configura repositorios de terceros (Chrome, Docker).
+# 03. Configura repositorios de terceros (Chrome, VSCode, Docker, DBeaver).
 setup_apt_repos() {
-    _log "Fase 3: Configurando repositorios APT de terceros"
+    _log "Configurando repositorios APT de terceros"
     sudo install -m 0755 -d /etc/apt/keyrings
+
+    # Visual Studio Code   
+    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft.gpg
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.sources
 
     # Google Chrome
     curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg
     echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+
+    # DBeaver (serge-rider)
+    curl -fsSL https://dbeaver.io/debs/dbeaver.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/dbeaver.gpg
+    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/dbeaver.gpg] https://dbeaver.io/debs/ stable main" | sudo tee /etc/apt/sources.list.d/serge-rider-ubuntu-dbeaver-ce-plucky.sources
 
     # Docker (con fallback a LTS)
     local ubuntu_codename
@@ -119,45 +126,18 @@ setup_apt_repos() {
     _success "Repositorios de Chrome y Docker configurados."
 }
 
-# 4. Instala todos los paquetes desde APT.
+# 04. Instala todos los paquetes desde APT.
 install_apt_packages() {
-    _log "Fase 4: Instalando paquetes esenciales y software desde APT"
+    _log "Instalando paquetes esenciales y software desde APT"
     sudo apt update
     sudo DEBIAN_FRONTEND=noninteractive apt install -y "${APT_ESSENTIALS[@]}"
     sudo DEBIAN_FRONTEND=noninteractive apt install -y "${APT_APPS[@]}"
     _success "Todos los paquetes APT instalados."
 }
 
-# 5. Instala VS Code y Composer usando los métodos oficiales.
-install_standalone_tools() {
-    _log "Fase 5: Instalando herramientas independientes (VS Code, Composer)"
-
-    # VS Code
-    if ! command -v code &> /dev/null; then
-        _log "Instalando Visual Studio Code..."
-        wget -qO /tmp/vscode.deb "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64"
-        sudo apt install -y /tmp/vscode.deb
-        rm /tmp/vscode.deb
-        _success "Visual Studio Code instalado."
-    else
-        _warning "Visual Studio Code ya está instalado. Omitiendo."
-    fi
-
-    # Composer
-    if ! command -v composer &> /dev/null; then
-        _log "Instalando Composer globalmente..."
-        wget -qO /tmp/composer-setup.php https://getcomposer.org/installer
-        sudo php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
-        rm /tmp/composer-setup.php
-        _success "Composer instalado globalmente."
-    else
-        _warning "Composer ya está instalado. Omitiendo."
-    fi
-}
-
-# 6. Configura Zsh, Oh My Zsh y los plugins.
+# 05. Configura Zsh, Oh My Zsh y los plugins.
 setup_zsh() {
-    _log "Fase 6: Configurando Zsh y Oh My Zsh"
+    _log "Configurando Zsh y Oh My Zsh"
     
     # Cambiar shell por defecto
     sudo chsh -s "$(which zsh)" "$SUDO_USER"
@@ -181,17 +161,9 @@ setup_zsh() {
     _success "Zsh y plugins configurados."
 }
 
-# 7. Instala aplicaciones GUI vía Flatpak.
-install_flatpaks() {
-    _log "Fase 7: Instalando aplicaciones GUI desde Flatpak"
-    sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    sudo flatpak install -y --noninteractive flathub "${FLATPAK_APPS[@]}"
-    _success "Aplicaciones Flatpak instaladas."
-}
-
-# 8. Configura el entorno de desarrollo (Docker, asdf).
+# 06. Configura el entorno de desarrollo (Docker, asdf).
 setup_dev_environment() {
-    _log "Fase 8: Configurando entorno de desarrollo (Docker, asdf)"
+    _log "Configurando entorno de desarrollo (Docker, asdf)"
 
     # Docker Post-install
     sudo usermod -aG docker "$SUDO_USER"
@@ -243,9 +215,9 @@ EOF
     _success "Docker y plugins de asdf configurados."
 }
 
-# 9. Copia y configura los dotfiles personalizados.
+# 10. Copia y configura los dotfiles personalizados.
 setup_dotfiles() {
-    _log "Fase 7: Configurando dotfiles personalizados"
+    _log "Configurando dotfiles personalizados"
     
     #local config_dir="$USER_HOME/.config/zsh"
     sudo -u "$SUDO_USER" mkdir -p "$config_dir"
@@ -258,6 +230,14 @@ setup_dotfiles() {
     sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/zshrc" "$USER_HOME/.zshrc"
 
     _success "Dotfiles copiados y .zshrc configurado."
+}
+
+# 20. Instala aplicaciones GUI vía Flatpak.
+install_flatpaks() {
+    _log "Instalando aplicaciones GUI desde Flatpak"
+    sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    sudo flatpak install -y --noninteractive flathub "${FLATPAK_APPS[@]}"
+    _success "Aplicaciones Flatpak instaladas."
 }
 
 # --- Función Principal que orquesta la ejecución ---
@@ -278,7 +258,6 @@ main() {
     remove_snap
     setup_apt_repos
     install_apt_packages
-    install_standalone_tools
     setup_zsh
     setup_dev_environment
     setup_dotfiles # <-- Nueva fase
