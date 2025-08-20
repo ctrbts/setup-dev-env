@@ -48,8 +48,8 @@ cleanup_previous_configs() {
     _log "Limpiando configuraciones de repositorios previas"
     
     # Eliminar archivos de lista de repositorios
-    sudo rm -f /etc/apt/sources.list.d/vscode.sources \
-               /etc/apt/sources.list.d/serge-rider-ubuntu-dbeaver-ce-plucky.sources \
+    sudo rm -f /etc/apt/sources.list.d/vscode.list \
+               /etc/apt/sources.list.d/serge-rider-ubuntu-dbeaver-ce-plucky.list \
                /etc/apt/sources.list.d/google-chrome.list \
                /etc/apt/sources.list.d/docker.list
 
@@ -100,7 +100,7 @@ setup_apt_repos() {
 
     # Visual Studio Code   
     curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft.gpg
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.sources
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
 
     # Google Chrome
     curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg
@@ -108,7 +108,7 @@ setup_apt_repos() {
 
     # DBeaver (serge-rider)
     curl -fsSL https://dbeaver.io/debs/dbeaver.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/dbeaver.gpg
-    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/dbeaver.gpg] https://dbeaver.io/debs/ stable main" | sudo tee /etc/apt/sources.list.d/serge-rider-ubuntu-dbeaver-ce-plucky.sources
+    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/dbeaver.gpg] https://dbeaver.io/debs/ stable main" | sudo tee /etc/apt/sources.list.d/serge-rider-ubuntu-dbeaver-ce-plucky.list
 
     # Docker (con fallback a LTS)
     local ubuntu_codename
