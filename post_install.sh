@@ -219,7 +219,7 @@ setup_dotfiles() {
     _log "Configurando dotfiles personalizados"
     
     #local config_dir="$USER_HOME/.config/zsh"
-    sudo -u "$SUDO_USER" mkdir -p "$config_dir"
+    #sudo -u "$SUDO_USER" mkdir -p "$config_dir"
 
     # Copiar archivos de configuración desde el repositorio
     sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/aliases.sh" "$USER_HOME/.aliases.sh"
