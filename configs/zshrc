@@ -116,5 +116,5 @@ export PATH="$HOME/.asdf/bin:$PATH"
 export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 
 # Cargar configuraciones personalizadas
-source ~/.config/zsh/functions.sh
-source ~/.config/zsh/aliases.sh
+source ~/.functions.sh
+source ~/.aliases.sh
