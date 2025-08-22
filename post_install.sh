@@ -56,6 +56,7 @@ APT_ESSENTIALS=(
 APT_APPS=(
     google-chrome-stable 
     gnome-boxes 
+    gnome-tweaks 
     sqlitebrowser 
     dbeaver-ce 
     code
