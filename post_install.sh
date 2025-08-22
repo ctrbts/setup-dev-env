@@ -22,6 +22,7 @@ REPO_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 APT_ESSENTIALS=(
     build-essential 
     ca-certificates 
+    neofetch 
     git 
     curl 
     wget 
