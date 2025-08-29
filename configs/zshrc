@@ -32,9 +32,8 @@ source "$ZSH/oh-my-zsh.sh"
 export PATH="/usr/local/bin:$HOME/.local/bin:$HOME/bin:$PATH"
 
 # --- ASDF (Gestor de Versiones) ---
-# Añade los shims de ASDF al PATH.
-export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
-export PATH="$HOME/.asdf/bin"
+# Añade los shims y el binario de ASDF al PATH.
+export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$HOME/.asdf/bin:$PATH"
 
 # Cargar funciones y alias personalizados desde archivos externos.
 # ¡Esto es una excelente práctica para mantener el .zshrc limpio!
