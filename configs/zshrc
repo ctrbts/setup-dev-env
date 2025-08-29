@@ -33,21 +33,13 @@ export PATH="/usr/local/bin:$HOME/.local/bin:$HOME/bin:$PATH"
 
 # --- ASDF (Gestor de Versiones) ---
 # Añade los shims de ASDF al PATH.
-# La configuración de ASDF en el playbook de Ansible ya añade esto, pero tenerlo
-# aquí de forma explícita no hace daño y es más claro.
 export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
-
-# --- Configuraciones para Proyectos de Desarrollo ---
-# Directorio estándar para todos los proyectos.
-export DEV_DIR="$HOME/dev"
+export PATH="$HOME/.asdf/bin"
 
 # Cargar funciones y alias personalizados desde archivos externos.
 # ¡Esto es una excelente práctica para mantener el .zshrc limpio!
 if [ -f ~/.functions.sh ]; then
     source ~/.functions.sh
-fi
-if [ -f ~/.aliases.sh ]; then
-    source ~/.aliases.sh
 fi
 
 # Descomenta para establecer tu editor preferido.
