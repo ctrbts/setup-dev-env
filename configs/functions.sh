@@ -11,7 +11,7 @@ BLUE='\033[0;34m'
 NC='\\033[0m'
 
 # Variables globales
-DEV_BASE_DIR="$HOME/DEV_HOST/github.com/ctrbts"
+DEV_BASE_DIR="$HOME/00_dev/github.com/ctrbts"
 CURRENT_USER=$(whoami)
 
 # Funciones de logging
@@ -285,8 +285,8 @@ _create_django_structure() {
     cd "$project_path"
     
     # Crear estructura de directorios
-    mkdir -p {docs,scripts,src,tests,venv}
-    mkdir -p src/{apps,core,logs,media,static,templates,tests,tmp}
+    mkdir -p {docs,scripts,src}
+    mkdir -p src/{apps,core,logs,media,static,tests}
     
     # Inicializar Git
     if [ "$skip_git" != "true" ]; then
@@ -323,12 +323,16 @@ _create_django_structure() {
 
 # Función para configurar Git
 _configure_git() {
-    if ! git config user.name &>/dev/null; then
-        git config user.name "$CURRENT_USER"
+    if ! git config --global user.name &>/dev/null; then
+        git config --global user.name "$CURRENT_USER"
     fi
     
-    if ! git config user.email &>/dev/null; then
-        git config user.email "${CURRENT_USER}@example.com"
+    if ! git config --global user.email &>/dev/null; then
+        git config --global user.email "${CURRENT_USER}@example.com"
+    fi
+
+    if ! git config --global init.defaultBranch &>/dev/null; then
+        git config --global init.defaultBranch "develop"
     fi
 }
 
@@ -363,7 +367,7 @@ MANIFEST
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-media/
+mediafiles/
 staticfiles/
 static/admin/
 static/rest_framework/
@@ -561,39 +565,39 @@ EOF
 _create_requirements() {
     cat > requirements.txt << 'EOF'
 # Django core
-Django>=4.2,<5.0
-djangorestframework>=3.14.0
+Django>
+djangorestframework
 
 # Database
-psycopg2-binary>=2.9.0
+psycopg2-binary
 
 # Environment
-python-decouple>=3.6
+python-decouple
 
 # Security
-django-cors-headers>=4.0.0
+django-cors-headers
 
 # Development
-django-debug-toolbar>=4.0.0
+django-debug-toolbar
 
 # Testing
-pytest>=7.0.0
-pytest-django>=4.5.0
+pytest
+pytest-django
 
 # Production
-gunicorn>=20.1.0
-whitenoise>=6.4.0
+gunicorn
+whitenoise
 
 # Utilities
-Pillow>=9.0.0
-requests>=2.28.0
+Pillow
+requests
 EOF
 }
 
 # Función para crear un .tool-versions
 _create_tool_versions() {
     cat > .tool-versions << 'EOF'
-python 3.12.4
+python 3.12.*
 EOF
 }
 
@@ -608,7 +612,7 @@ _setup_django_project() {
     
     # Instalar Django
     pip install --upgrade pip
-    pip install Django>=4.2
+    pip install django
     
     # Crear proyecto Django
     django-admin startproject core src
