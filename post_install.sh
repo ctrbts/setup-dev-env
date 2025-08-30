@@ -286,6 +286,9 @@ main() {
         exit 1
     fi
 
+    _log "Actualizando paquetes del sistema"
+    sudo apt update && sudo apt full-upgrade -y
+
     # Inicializar variables para los flags
     MODE="all"
     REMOVE_SNAP=false
@@ -333,6 +336,7 @@ main() {
     fi
 
     # Limpieza final
+    _log "Limpiando la instalación"
     sudo apt autoremove -y && sudo apt autoclean
 
     # Mensajes finales
