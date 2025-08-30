@@ -287,20 +287,47 @@ main() {
         exit 1
     fi
 
+    # Inicializar variables para los flags
     MODE="all"
-    if [[ "$1" == "--dev-only" ]]; then
-        MODE="dev"
-    fi
+    REMOVE_SNAP=false
+
+    # Parsear los argumentos de línea de comandos
+    for arg in "$@"; do
+        case $arg in
+            --dev-only)
+            MODE="dev"
+            shift # Quitar --dev-only de la lista de argumentos
+            ;;
+            --remove-snap)
+            REMOVE_SNAP=true
+            shift # Quitar --remove-snap de la lista de argumentos
+            ;;
+            *)
+            # Argumento desconocido, se puede ignorar o manejar como error
+            ;;
+        esac
+    done
+    
     _log "Iniciando configuración de la workstation en modo: $MODE"
+    if [ "$REMOVE_SNAP" = true ]; then
+        _warning "La opción --remove-snap está activa. Se procederá a eliminar Snapd."
+    fi
 
     # Fases de instalación
     cleanup_previous_configs
-    remove_snap
+
+    # Ejecutar la eliminación de Snap solo si el flag está presente
+    if [ "$REMOVE_SNAP" = true ]; then
+        remove_snap
+    else
+        _log "Omitiendo la eliminación de Snapd. Para eliminarlo, ejecuta el script con el flag --remove-snap."
+    fi
+
     setup_apt_repos
     install_apt_packages
     setup_zsh
     setup_dev_environment
-    setup_dotfiles # <-- Nueva fase
+    setup_dotfiles
 
     if [[ "$MODE" == "all" ]]; then
         install_flatpaks
