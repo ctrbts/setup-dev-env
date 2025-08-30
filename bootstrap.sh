@@ -4,7 +4,7 @@ set -e
 
 # --- Variables ---
 REPO_URL="https://github.com/ctrbts/setup-dev-env.git"
-TARGET_DIR="$HOME/00_dev/github.com/ctrbts/setup-dev-env"
+TARGET_DIR="$HOME/dev/github.com/ctrbts/setup-dev-env"
 
 echo "==> Asegurando que 'git' esté instalado..."
 # Instalar git si no está presente.
