@@ -23,5 +23,6 @@ echo "==> Asignando permisos de ejecución al script principal..."
 chmod +x post_install.sh
 
 echo "==> Ejecutando el script de post-instalación..."
-# Ejecutar el script principal con sudo.
-sudo ./post_install.sh --all
+# Ejecuta post_install.sh pasando todos los argumentos recibidos por bootstrap.sh.
+# Si no se pasa ningún argumento, usa "--all" como valor predeterminado.
+sudo ./post_install.sh "${@:---all}"
