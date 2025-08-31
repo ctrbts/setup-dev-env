@@ -15,10 +15,10 @@ CURRENT_USER=$(whoami)
 DEV_BASE_DIR="$HOME/dev/github.com/$CURRENT_USER"
 
 # Funciones de logging
-log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
-log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+log_info() { echo -e "${BLUE}[INFO] $1"; }
+log_success() { echo -e "${GREEN}[SUCCESS] $1"; }
+log_warning() { echo -e "${YELLOW}[WARNING] $1"; }
+log_error() { echo -e "${RED}[ERROR] $1"; }
 
 # =============================================================================
 # FUNCIONES DE NAVEGACIÓN Y GESTIÓN DE DIRECTORIOS
