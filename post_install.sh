@@ -225,6 +225,7 @@ setup_dev_environment() {
         sudo -u "$SUDO_USER" mkdir -p "$asdf_data_dir/bin"
         sudo -u "$SUDO_USER" tar -xzf "/tmp/$asdf_tarball" -C "$asdf_data_dir/bin"
         rm "/tmp/$asdf_tarball"
+        sudo chown -R $USER .asdf
         
         # Configurar asdf en .zshrc
         local zshrc_file="$USER_HOME/.zshrc"
