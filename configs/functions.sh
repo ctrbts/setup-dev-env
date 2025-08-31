@@ -11,8 +11,8 @@ BLUE='\033[0;34m'
 NC='\\033[0m'
 
 # Variables globales
-DEV_BASE_DIR="$HOME/00_dev/github.com/ctrbts"
 CURRENT_USER=$(whoami)
+DEV_BASE_DIR="$HOME/dev/github.com/$CURRENT_USER"
 
 # Funciones de logging
 log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
@@ -23,6 +23,13 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 # =============================================================================
 # FUNCIONES DE NAVEGACIÓN Y GESTIÓN DE DIRECTORIOS
 # =============================================================================
+
+# Función para actualizar la workstation
+update-workstation() {
+    log_info "Actualizando la workstation..."
+    rm -rf "$DEV_BASE_DIR/setup-dev-env"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/main/bootstrap.sh)" _ --dev-only
+}
 
 # Función para ir al directorio de desarrollo
 devdir() {
