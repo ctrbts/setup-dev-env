@@ -17,6 +17,7 @@ sudo apt-get install -y curl git
 
 echo "==> Clonando el repositorio de configuración..."
 # Clonar el repositorio.
+rm -rf "$REPO_URL" "$TARGET_DIR"
 git clone "$REPO_URL" "$TARGET_DIR"
 
 # Cambiar al directorio del repositorio.
