@@ -92,6 +92,7 @@ cleanup_previous_configs() {
     
     # Eliminar archivos de lista de repositorios
     sudo rm -f /etc/apt/sources.list.d/vscode.list \
+               /etc/apt/sources.list.d/vscode.sources \
                /etc/apt/sources.list.d/serge-rider-ubuntu-dbeaver-ce-plucky.list \
                /etc/apt/sources.list.d/google-chrome.list \
                /etc/apt/sources.list.d/docker.list
