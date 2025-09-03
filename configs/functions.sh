@@ -8,7 +8,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\\033[0m'
+NC='\033[0m'
 
 # Variables globales
 CURRENT_USER=$(whoami)
@@ -103,38 +103,37 @@ lsdev() {
 clone_repo() {
     local repo_url=$1
     local use_ssh=${2:-false}
-    
+
     if [ -z "$repo_url" ]; then
         log_error "Uso: clone_repo <url-repositorio> [true|false para SSH]"
         return 1
     fi
+
+    # Normalizar URL para extraer partes
+    local normalized_url=$(echo "$repo_url" | sed -e 's/^https:\/\///' -e 's/^git@//' -e 's/:/\//')
     
-    # Extraer información de la URL
-    if [[ $repo_url =~ ^https?://([^/]+)/([^/]+)/([^/]+)/?.*$ ]]; then
-        local host="${BASH_REMATCH[1]}"
-        local org="${BASH_REMATCH[2]}"
-        local repo="${BASH_REMATCH[3]}"
-        
-        # Remover .git del final si existe
-        repo=${repo%.git}
-        
-        local target_dir="$HOME/dev/$host/$org/$repo"
-        
-        log_info "Clonando en: $target_dir"
-        mkdir -p "$(dirname "$target_dir")"
-        
-        if [ "$use_ssh" = "true" ]; then
-            repo_url="git@$host:$org/$repo.git"
-        fi
-        
-        git clone "$repo_url" "$target_dir" && {
-            cd "$target_dir"
-            log_success "Repositorio clonado exitosamente"
-        }
-    else
-        log_error "URL no válida: $repo_url"
+    local host=$(echo "$normalized_url" | cut -d'/' -f1)
+    local org=$(echo "$normalized_url" | cut -d'/' -f2)
+    local repo=$(echo "$normalized_url" | cut -d'/' -f3 | sed 's/.git$//')
+
+    if [ -z "$host" ] || [ -z "$org" ] || [ -z "$repo" ]; then
+        log_error "No se pudo parsear la URL del repositorio: $repo_url"
         return 1
     fi
+
+    local target_dir="$HOME/dev/$host/$org/$repo"
+
+    log_info "Clonando en: $target_dir"
+    mkdir -p "$(dirname "$target_dir")"
+
+    if [ "$use_ssh" = "true" ]; then
+        repo_url="git@$host:$org/$repo.git"
+    fi
+
+    git clone "$repo_url" "$target_dir" && {
+        cd "$target_dir"
+        log_success "Repositorio clonado exitosamente"
+    }
 }
 
 # Función para clonar repositorio shorthand (user/repo)
@@ -380,6 +379,8 @@ static/admin/
 static/rest_framework/
 
 # Virtual Environment
+virtualenv/
+virtualenv-clone/
 venv/
 env/
 ENV/
@@ -482,10 +483,14 @@ python src/manage.py runserver
 
 ## Scripts Disponibles
 
-- \`./scripts/setup.sh\` - Configuración inicial
-- \`./scripts/deploy.sh\` - Despliegue
-- \`./scripts/backup.sh\` - Respaldo
-- \`./scripts/test.sh\` - Tests
+- 
+xargs -I {} echo "  - {}" <<< "./scripts/setup.sh - Configuración inicial"
+- 
+xargs -I {} echo "  - {}" <<< "./scripts/deploy.sh - Despliegue"
+- 
+xargs -I {} echo "  - {}" <<< "./scripts/backup.sh - Respaldo"
+- 
+xargs -I {} echo "  - {}" <<< "./scripts/test.sh - Tests"
 
 ## Desarrollo
 
@@ -573,7 +578,7 @@ _create_requirements() {
     cat > requirements.txt << 'EOF'
 # Django core
 Django>
-djangorestframework
+ djangorestframework
 
 # Database
 psycopg2-binary
@@ -665,7 +670,7 @@ pip install -r requirements.txt
 log_success "Dependencias instaladas"
 
 # Crear .env si no existe
-if [ ! -f ".env" ] && [ -f ".env.example" ]; then
+if [ ! -f ".env" ] && [ ! -f ".env.example" ]; then
     cp .env.example .env
     log_success "Archivo .env creado desde template"
 fi
@@ -802,7 +807,7 @@ EOF
 alias djcreate='create_django_project'
 alias clone='clone_repo'
 alias clones='clone_short'
-alias projects='lsdev'
+projects='lsdev'
 
 # =============================================================================
 # FUNCIÓN DE AYUDA
