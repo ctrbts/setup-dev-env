@@ -1,6 +1,6 @@
 Para configurar una máquina nueva ejecute uno de los comandos de abajo. Esto descargará un pequeño script que clonará el repositorio y ejecutará la instalación.
 
-### Instalación Estándar (Recomendado)
+## Instalación Estándar (Recomendado)
 
 Este comando ejecuta la configuración completa pero **mantiene Snap** para máxima compatibilidad con versiones recientes de Ubuntu.
 
@@ -22,3 +22,14 @@ ADVERTENCIA: Solo usar si entiendes las implicaciones de eliminar `snapd` de tu 
 
 **Explicación del formato del comando:**
 El `_` después del script es un placeholder necesario para que `sh -c` asigne correctamente los argumentos (`--all`, `--remove-snap`, etc.) al script descargado.
+
+## Scripts
+
+Estos scripts están diseñados para automatizar la instalación y configuración de herramientas y entornos necesarios para el desarrollo de software.
+
+Este repositorio es una referencia personal y la actualizo a medida de mis necesidades (es probable que no incluya algunos stack de desarrollo).
+
+## Configuración para diferentes plataformas
+
+- [Ubuntu](/markdown/setup-ubuntu.md)
+- [Windows](/markdown/setup-win.md)
