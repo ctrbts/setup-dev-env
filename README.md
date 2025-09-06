@@ -25,11 +25,13 @@ El `_` después del script es un placeholder necesario para que `sh -c` asigne c
 
 ## Scripts
 
-Estos scripts están diseñados para automatizar la instalación y configuración de herramientas y entornos necesarios para el desarrollo de software.
+- [Aquí hay varios scripts](/scripts) que están diseñados para automatizar la instalación y configuración de herramientas y entornos necesarios para el desarrollo de software.
 
-Este repositorio es una referencia personal y la actualizo a medida de mis necesidades (es probable que no incluya algunos stack de desarrollo).
 
 ## Configuración para diferentes plataformas
 
 - [Ubuntu](/markdown/setup-ubuntu.md)
 - [Windows](/markdown/setup-win.md)
+
+---
+Este repositorio es una referencia personal y la actualizo a medida de mis necesidades (es probable que no incluya algunos stack de desarrollo).
