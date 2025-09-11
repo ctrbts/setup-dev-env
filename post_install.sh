@@ -71,12 +71,14 @@ FLATPAK_APPS=(
     org.videolan.VLC 
     org.gimp.GIMP 
     org.inkscape.Inkscape
+    org.blender.Blender
 )
 
 ASDF_PLUGINS=(
     python 
     php 
     nodejs
+    java
 )
 
 # --- Funciones de Utilidad ---
