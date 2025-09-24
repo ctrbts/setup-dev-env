@@ -25,7 +25,8 @@ APT_ESSENTIALS=(
     git 
     curl 
     wget 
-    zsh 
+    zsh
+    htop
     gnupg 
     ncdu 
     file-roller 
@@ -72,6 +73,8 @@ FLATPAK_APPS=(
     org.gimp.GIMP 
     org.inkscape.Inkscape
     org.blender.Blender
+    #org.onlyoffice.desktopeditors
+    #md.obsidian.Obsidian
 )
 
 ASDF_PLUGINS=(
