@@ -65,6 +65,8 @@ APT_APPS=(
     containerd.io 
     docker-buildx-plugin 
     docker-compose-plugin
+    firefox-devedition
+    firefox-devedition-l10n-es-ar
 )
 
 FLATPAK_APPS=(
@@ -100,6 +102,7 @@ cleanup_previous_configs() {
                /etc/apt/sources.list.d/vscode.sources \
                /etc/apt/sources.list.d/serge-rider-ubuntu-dbeaver-ce-plucky.list \
                /etc/apt/sources.list.d/google-chrome.list \
+               /etc/apt/sources.list.d/mozilla.list \
                /etc/apt/sources.list.d/docker.list
 
     # Eliminar llaves GPG antiguas
@@ -146,6 +149,16 @@ EOF
 setup_apt_repos() {
     _log "Configurando repositorios APT de terceros"
     sudo install -m 0755 -d /etc/apt/keyrings
+
+    # Firefox Developer Edition (opcional)
+    # sudo add-apt-repository -y ppa:mozillateam/ppa
+    # sudo install -d -m 0755 /etc/apt/keyrings
+    wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
+    echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null
+    echo 'Package: *
+        Pin: origin packages.mozilla.org
+        Pin-Priority: 1000
+        ' | sudo tee /etc/apt/preferences.d/mozilla
 
     # Visual Studio Code
     curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --yes --dearmor -o /usr/share/keyrings/microsoft.gpg
