@@ -71,7 +71,7 @@ APT_APPS=(
 )
 
 FLATPAK_APPS=(
-    org.mozilla.firefox 
+    #org.mozilla.firefox 
     org.videolan.VLC 
     org.gimp.GIMP 
     org.inkscape.Inkscape
