@@ -7,7 +7,10 @@ CURRENT_USER=$(whoami)
 DEV_BASE_DIR="$HOME/dev/github.com/$CURRENT_USER"
 
 # --- Variables ---
-REPO_URL="https://github.com/ctrbts/setup-dev-env.git"
+# Acceso por SSH
+REPO_URL="git@github.com:ctrbts/setup-dev-env.git"
+# Descomentar si el repositorio es público
+#REPO_URL="https://github.com/ctrbts/setup-dev-env.git"
 TARGET_DIR="$DEV_BASE_DIR/setup-dev-env"
 
 echo "==> Asegurando que 'git' esté instalado..."
