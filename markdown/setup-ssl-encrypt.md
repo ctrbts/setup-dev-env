@@ -40,7 +40,7 @@ Encuentre la línea server_name existente. Debería tener el siguiente aspecto:
 
 /etc/nginx/sites-available/example.com
 ...
-server_name example.com www.example.com;
+server_name example.com <www.example.com>;
 ...
 Si esto sucede, salga de su editor y continúe con el paso siguiente.
 
@@ -67,9 +67,9 @@ Status: active
 
 To                         Action      From
 --                         ------      ----
-OpenSSH                    ALLOW       Anywhere                  
-Nginx HTTP                 ALLOW       Anywhere                  
-OpenSSH (v6)               ALLOW       Anywhere (v6)             
+OpenSSH                    ALLOW       Anywhere
+Nginx HTTP                 ALLOW       Anywhere
+OpenSSH (v6)               ALLOW       Anywhere (v6)
 Nginx HTTP (v6)            ALLOW       Anywhere (v6)
 Para permitir de forma adicional el tráfico de HTTPS, habilite el perfil de Nginx Full y elimine el permiso de perfil redundante HTTP de Nginx.
 
@@ -92,7 +92,7 @@ A continuación, ejecutaremos Certbot y buscaremos nuestros certificados.
 Paso 4: Obtener un certificado SSL
 Certbot ofrece varias alternativas para obtener certificados SSL a través de complementos. El complemento de Nginx se encargará de reconfigurar Nginx y volver a cargar la configuración cuando sea necesario. Para utilizar este complemento, escriba lo siguiente:
 
-sudo certbot --nginx -d example.com -d www.example.com
+sudo certbot --nginx -d example.com -d <www.example.com>
 Esto ejecuta certbot con el complemento --nginx, usando -d para especificar los nombres de dominio para los que queremos que el certificado sea válido.
 
 Si es la primera vez que ejecuta certbot, se le pedirá que ingrese una dirección de correo electrónico y que acepte las condiciones de servicio. Después de esto, certbot se comunicará con el servidor de Let’s Encrypt y realizará una comprobación a fin de verificar que usted controle el dominio para el cual solicite un certificado.
@@ -112,7 +112,8 @@ Seleccione su elección y luego ENTER. La configuración se actualizará y Nginx
 
 Output
 IMPORTANT NOTES:
- - Congratulations! Your certificate and chain have been saved at:
+
+- Congratulations! Your certificate and chain have been saved at:
    /etc/letsencrypt/live/example.com/fullchain.pem
    Your key file has been saved at:
    /etc/letsencrypt/live/example.com/privkey.pem
@@ -120,10 +121,10 @@ IMPORTANT NOTES:
    version of this certificate in the future, simply run certbot again
    with the "certonly" option. To non-interactively renew *all* of
    your certificates, run "certbot renew"
- - If you like Certbot, please consider supporting our work by:
+- If you like Certbot, please consider supporting our work by:
 
-   Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
-   Donating to EFF:                    https://eff.org/donate-le
+   Donating to ISRG / Let's Encrypt:   <https://letsencrypt.org/donate>
+   Donating to EFF:                    <https://eff.org/donate-le>
 Así, sus certificados se quedarán descargados, instalados y cargados. Intente volver a cargar su sitio web utilizando https:// y observe el indicador de seguridad de su navegador. Debería indicar que el sitio cuenta con la protección correcta, en general, con un ícono de un candado. Si prueba su servidor utilizando SSL Labs Server Test, obtendrá una calificación A.
 
 Terminaremos con una prueba del proceso de renovación.

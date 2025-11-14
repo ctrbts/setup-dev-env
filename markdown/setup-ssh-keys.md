@@ -1,10 +1,12 @@
+# Configurar SSH en un servidor Ubuntu
+
 ## 1. Generar una nueva clave SSH
 
 Primero, necesitas crear un par de claves SSH (una pública y una privada) en tu computadora.
 
 Abre una terminal o Git Bash en tu computadora.
 
-Pega el siguiente comando, reemplazando "tu_email@ejemplo.com" con el correo electrónico asociado a tu cuenta de GitHub.
+Pega el siguiente comando, reemplazando "<tu_email@ejemplo.com>" con el correo electrónico asociado a tu cuenta de GitHub.
 
 ```Bash
 ssh-keygen -t ed25519 -C "tu_email@ejemplo.com"
@@ -17,6 +19,7 @@ Luego, te pedirá que crees una contraseña (passphrase) para tu clave SSH. Esto
 Esto generará dos archivos en una carpeta oculta .ssh dentro de tu directorio de usuario: id_ed25519 (tu clave privada, ¡no la compartas!) y id_ed25519.pub (tu clave pública).
 
 ## 2. Añadir tu clave SSH al ssh-agent
+
 El ssh-agent es un programa que gestiona tus claves SSH y recuerda tu contraseña si estableciste una.
 
 Inicia el ssh-agent en segundo plano con el siguiente comando:
@@ -56,6 +59,7 @@ Pega tu clave pública (la que copiaste del terminal) en el campo Key.
 Finalmente, haz clic en Add SSH key. Es posible que te pida tu contraseña de GitHub para confirmar.
 
 ## 4. Probar la conexión y clonar un repositorio
+
 Para asegurarte de que todo funciona correctamente, puedes probar la conexión a GitHub.
 
 Abre tu terminal y ejecuta:
@@ -68,7 +72,7 @@ Es posible que veas una advertencia sobre la autenticidad del host. Escribe yes 
 
 Si todo está correcto, verás un mensaje como: Hi tu-usuario! You've successfully authenticated, but GitHub does not provide shell access. ¡Esto significa que funcionó! 🎉
 
-Ahora, para clonar un repositorio, asegúrate de usar la URL SSH en lugar de la HTTPS. En la página del repositorio de GitHub, haz clic en el botón verde Code y selecciona la opción SSH. La URL debería empezar con git@github.com:.
+Ahora, para clonar un repositorio, asegúrate de usar la URL SSH en lugar de la HTTPS. En la página del repositorio de GitHub, haz clic en el botón verde Code y selecciona la opción SSH. La URL debería empezar con <git@github.com>:.
 
 Usa esa URL para clonar:
 

@@ -12,7 +12,7 @@ NC='\033[0m'
 
 # Variables globales
 CURRENT_USER=$(whoami)
-DEV_BASE_DIR="$HOME/dev/github.com/$CURRENT_USER"
+DEV_BASE_DIR="$HOME/workspace/github.com/$CURRENT_USER"
 
 # Funciones de logging
 log_info() { echo -e "${BLUE}[INFO] $1"; }
@@ -121,7 +121,7 @@ clone_repo() {
         return 1
     fi
 
-    local target_dir="$HOME/dev/$host/$org/$repo"
+    local target_dir="$HOME/workspace/$host/$org/$repo"
 
     log_info "Clonando en: $target_dir"
     mkdir -p "$(dirname "$target_dir")"
@@ -158,7 +158,7 @@ clone_short() {
     local org=$(echo "$path" | cut -d'/' -f1)
     local repo=$(echo "$path" | cut -d'/' -f2)
     
-    local target_dir="$HOME/dev/$host/$org/$repo"
+    local target_dir="$HOME/workspace/$host/$org/$repo"
     
     if [[ $use_ssh == "true" ]]; then
         local url="git@$host:$org/$repo.git"
