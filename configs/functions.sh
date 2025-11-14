@@ -807,7 +807,8 @@ EOF
 alias djcreate='create_django_project'
 alias clone='clone_repo'
 alias clones='clone_short'
-projects='lsdev'
+alias projects='lsdev'
+alias update-workstation='update-workstation'
 
 # =============================================================================
 # FUNCIÓN DE AYUDA
