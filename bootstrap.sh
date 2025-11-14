@@ -4,7 +4,7 @@ set -e
 
 # Variables globales
 CURRENT_USER=$(whoami)
-DEV_BASE_DIR="$HOME/dev/github.com/$CURRENT_USER"
+DEV_BASE_DIR="$HOME/workspace/github.com/$CURRENT_USER"
 
 # --- Variables ---
 # Acceso por SSH
