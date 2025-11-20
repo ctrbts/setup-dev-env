@@ -17,7 +17,7 @@
 # 1. Crear tu usuario (ej. 'soporte' o 'sysadmin'): adduser soporte
 # 2. Darle permisos 'sudo': usermod -aG sudo soporte
 # 3. (Opcional pero recomendado) Configurar tu clave SSH: mkdir -p /home/soporte/.ssh
-# 4. Copiamos la clave SSH: cp /root/.ssh/authorized_keys /home/soporte/.ssh/
+# 4. Copiamos la clave SSH: mv /root/.ssh/authorized_keys /home/soporte/.ssh/
 # 5. Le cambiamos el porpietario: chown -R soporte:soporte /home/soporte/.ssh
 # 6. Salir de 'root': # exit
 # 7. Creamos un nevo archivo: nano setup.sh
@@ -74,6 +74,7 @@ apt-get install -y \
     nginx \
     git \
     zsh \
+    mc \
     php-fpm \
     php-mysql \
     php-mbstring \
@@ -108,14 +109,20 @@ ufw allow 'Nginx Full' # Permitir HTTP (80) y HTTPS (443)
 echo "y" | ufw enable
 ufw status verbose
 
-# --- 7. Creación del Directorio de la Aplicación ---
-echo "[+] Creando directorio raíz de la aplicación en $WEB_ROOT..."
-# Crear el directorio base y el directorio 'public'
+# --- 7. Creación del Directorio de la Aplicación y Permisos ---
+echo "[+] Configurando directorio de aplicación y permisos para $SUDO_USER..."
+# Crear directorios
 mkdir -p "$WEB_ROOT"
-# Asignar propiedad al usuario que corre Nginx/PHP
-# Damos propiedad a todo el directorio de la app
+# Añadir al usuario de despliegue al grupo www-data
+usermod -aG www-data "$SUDO_USER"
+# Asignar propiedad a www-data:www-data
 chown -R www-data:www-data "$APP_DIR"
-chmod -R 755 "$APP_DIR"
+# Asignar permisos 775 (Dueño: rwx, Grupo: rwx, Otros: r-x)
+chmod -R 775 "$APP_DIR"
+# Set Group ID (SGID): Hace que los nuevos archivos hereden el grupo del directorio padre
+find "$APP_DIR" -type d -exec chmod g+s {} +
+
+echo "[i] Permisos configurados. $SUDO_USER ahora tiene acceso de escritura en $APP_DIR"
 
 # --- 8. Configuración de Nginx ---
 echo "[+] Configurando Nginx..."
@@ -131,7 +138,7 @@ server {
     listen 80;
     server_name _; # Escucha en cualquier IP/dominio
     
-    # ¡CAMBIO IMPORTANTE! El root es el directorio 'public'
+    # El root es el directorio 'public'
     root $WEB_ROOT;
 
     # Permitir uploads de hasta 64M (igualando a PHP)
