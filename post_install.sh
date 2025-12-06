@@ -286,8 +286,7 @@ EOF
 setup_dotfiles() {
     _log "Configurando dotfiles personalizados"
 
-    # Copiar archivos de configuración desde el repositorio
-    sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/GEMINI.md" "$USER_HOME/GEMINI.md"
+    # Agregar aqui archivos de configuración a copiar desde el repositorio
     sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/functions.sh" "$USER_HOME/.functions.sh"
     
     # Reemplazar el .zshrc del usuario con nuestra versión personalizada
