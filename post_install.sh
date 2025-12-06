@@ -72,13 +72,11 @@ APT_APPS=(
 )
 
 FLATPAK_APPS=(
-    #org.mozilla.firefox 
     org.videolan.VLC 
     org.gimp.GIMP 
     org.inkscape.Inkscape
     org.blender.Blender
     org.onlyoffice.desktopeditors
-    md.obsidian.Obsidian
 )
 
 ASDF_PLUGINS=(
@@ -165,6 +163,10 @@ setup_apt_repos() {
     # Visual Studio Code
     curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --yes --dearmor -o /usr/share/keyrings/microsoft.gpg
     echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
+
+    # Antigravity Google
+    curl -fsSL https://us-central1-apt.pkg.dev/doc/repo-signing-key.gpg | sudo gpg --dearmor --yes -o /etc/apt/keyrings/antigravity-repo-key.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/antigravity-repo-key.gpg] https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev/ antigravity-debian main" | sudo tee /etc/apt/sources.list.d/antigravity.list > /dev/null
 
     # Google Chrome
     curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --yes --dearmor -o /etc/apt/keyrings/google-chrome.gpg
