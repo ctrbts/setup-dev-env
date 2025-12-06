@@ -808,7 +808,7 @@ alias djcreate='create_django_project'
 alias clone='clone_repo'
 alias clones='clone_short'
 alias projects='lsdev'
-alias update-workstation='update-workstation'
+alias updws='update-workstation'
 
 # =============================================================================
 # FUNCIÓN DE AYUDA
@@ -838,6 +838,9 @@ dev_help() {
     echo "  djcreate ecommerce --with-docker"
     echo "  clone_short django/django"
     echo "  cdp mi-blog"
+    echo ""
+    echo -e "${GREEN}Actualizar el stack:${NC}"
+    echo "  updws"
 }
 
 # Mostrar ayuda al cargar
