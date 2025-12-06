@@ -62,6 +62,7 @@ APT_APPS=(
     sqlitebrowser 
     dbeaver-ce 
     code
+    antigravity 
     docker-ce 
     docker-ce-cli 
     containerd.io 
