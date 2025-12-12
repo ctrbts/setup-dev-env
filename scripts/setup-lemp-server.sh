@@ -15,7 +15,7 @@
 #
 # USO:
 # 1. Crear tu usuario (ej. 'soporte' o 'sysadmin'): adduser soporte
-# 2. Darle permisos 'sudo': usermod -aG sudo soporte
+# 2. Darle permisos 'sudo': usermod -aG sudo www-data soporte
 # 3. (Opcional pero recomendado) Configurar tu clave SSH: mkdir -p /home/soporte/.ssh
 # 4. Copiamos la clave SSH: mv /root/.ssh/authorized_keys /home/soporte/.ssh/
 # 5. Le cambiamos el porpietario: chown -R soporte:soporte /home/soporte/.ssh
