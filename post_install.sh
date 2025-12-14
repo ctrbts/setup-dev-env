@@ -311,7 +311,7 @@ main() {
     fi
 
     _log "Actualizando paquetes del sistema"
-    sudo apt update && sudo apt full-upgrade -y
+    sudo apt update && sudo apt upgrade -y
 
     # Inicializar variables para los flags
     MODE="all"
