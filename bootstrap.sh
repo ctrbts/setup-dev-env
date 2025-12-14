@@ -8,9 +8,9 @@ DEV_BASE_DIR="$HOME/workspace/github.com/$CURRENT_USER"
 
 # --- Variables ---
 # Acceso por SSH
-REPO_URL="git@github.com:ctrbts/setup-dev-env.git"
+#REPO_URL="git@github.com:ctrbts/setup-dev-env.git"
 #Descomentar si el repositorio es público
-#REPO_URL="https://github.com/ctrbts/setup-dev-env.git"
+REPO_URL="https://github.com/ctrbts/setup-dev-env.git"
 TARGET_DIR="$DEV_BASE_DIR/setup-dev-env"
 
 echo "==> Asegurando que 'git' esté instalado..."
