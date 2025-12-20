@@ -26,7 +26,6 @@ APT_ESSENTIALS=(
     curl 
     wget 
     zsh
-    htop
     gnupg 
     ncdu 
     file-roller 
@@ -78,6 +77,7 @@ FLATPAK_APPS=(
     org.inkscape.Inkscape
     org.blender.Blender
     org.onlyoffice.desktopeditors
+    net.nokyan.Resources
 )
 
 ASDF_PLUGINS=(
