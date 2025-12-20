@@ -249,7 +249,7 @@ setup_dev_environment() {
         sudo -u "$SUDO_USER" mkdir -p "$asdf_data_dir/bin"
         sudo -u "$SUDO_USER" tar -xzf "/tmp/$asdf_tarball" -C "$asdf_data_dir/bin"
         rm "/tmp/$asdf_tarball"
-        # sudo chown -R $USER .asdf
+        sudo chown -R "$SUDO_USER:$SUDO_USER" "$asdf_data_dir"
         
         # Configurar asdf en .zshrc
         local zshrc_file="$USER_HOME/.zshrc"
@@ -275,8 +275,8 @@ EOF
 
     # Instalar plugins
     for plugin in "${ASDF_PLUGINS[@]}"; do
-        if ! asdf plugin list | grep -q "$plugin"; then
-            asdf plugin add "$plugin"
+        if ! sudo -u "$SUDO_USER" env ASDF_DATA_DIR="$asdf_data_dir" PATH="$asdf_data_dir/shims:$asdf_data_dir/bin:$PATH" asdf plugin list | grep -q "$plugin"; then
+            sudo -u "$SUDO_USER" env ASDF_DATA_DIR="$asdf_data_dir" PATH="$asdf_data_dir/shims:$asdf_data_dir/bin:$PATH" asdf plugin add "$plugin"
         fi
     done
     _success "Docker y plugins de asdf configurados."
