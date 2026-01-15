@@ -28,7 +28,7 @@ log_error() { echo -e "${RED}[ERROR] $1"; }
 update-workstation() {
     log_info "Actualizando la workstation..."
     rm -rf "$DEV_BASE_DIR/setup-dev-env"
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/main/bootstrap.sh)" _ --dev-only
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/tu_usuario/setup-dev-env/main/bootstrap.sh)" _ --dev-only
 }
 
 # Función para ir al directorio de desarrollo

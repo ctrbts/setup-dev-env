@@ -4,7 +4,7 @@ Para configurar una máquina nueva ejecute uno de los comandos de abajo. Esto de
 
 Este comando ejecuta la configuración completa pero **mantiene Snap** para máxima compatibilidad con versiones recientes de Ubuntu.
 
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/main/bootstrap.sh)"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/tu_usuario/setup-dev-env/main/bootstrap.sh)"
 
 ### Uso Avanzado
 
@@ -14,11 +14,11 @@ Puedes pasar flags directamente al script de instalación para modificar su comp
 
 ADVERTENCIA: Solo usar si entiendes las implicaciones de eliminar `snapd` de tu sistema.
 
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/main/bootstrap.sh)" _ --all --remove-snap
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/tu_usuario/setup-dev-env/main/bootstrap.sh)" _ --all --remove-snap
 
 **Ejemplo 2: Instalación solo de herramientas de desarrollo (sin Apps de escritorio y sin eliminar Snap)**
 
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/main/bootstrap.sh)" _ --dev-only
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/tu_usuario/setup-dev-env/main/bootstrap.sh)" _ --dev-only
 
 **Explicación del formato del comando:**
 El `_` después del script es un placeholder necesario para que `sh -c` asigne correctamente los argumentos (`--all`, `--remove-snap`, etc.) al script descargado.

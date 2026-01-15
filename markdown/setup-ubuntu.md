@@ -248,7 +248,7 @@ Agregue las siguientes líneas a su archivo de configuración ~/.zshrc:
 ## LEMP
 
 Descargamos el script automatizado de instalacion
-[LEMP Install](https://raw.githubusercontent.com/ctrbts/mi-dev-setup/refs/heads/main/conf/lemp-install.sh)
+[LEMP Install](https://raw.githubusercontent.com/tu_usuario/setup-dev-env/main/scripts/lemp-install.sh)
 
 ## LAMPP
 

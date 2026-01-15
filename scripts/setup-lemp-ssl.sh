@@ -44,8 +44,8 @@ echo "[i] Script ejecutado por el usuario '$SUDO_USER'."
 # --- Variables ---
 APP_DIR="/var/www/app"
 WEB_ROOT="$APP_DIR/public"
-DOMAIN_NAME="ingreso.folp.unlp.edu.ar"  # <--- TU DOMINIO REAL
-CERT_EMAIL="fdomerlo@gmail.com" # <--- Email para avisos de expiración SSL
+DOMAIN_NAME="tu_dominio.com"  # <--- TU DOMINIO REAL
+CERT_EMAIL="tu_email@ejemplo.com" # <--- Email para avisos de expiración SSL
 
 echo "--- Iniciando provisionamiento de Nginx/PHP/SSL ---"
 echo "  Dominio: $DOMAIN_NAME"
