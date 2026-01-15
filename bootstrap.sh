@@ -6,11 +6,19 @@ set -e
 CURRENT_USER=$(whoami)
 DEV_BASE_DIR="$HOME/workspace/github.com/$CURRENT_USER"
 
+# --- Configuración Interactiva ---
+printf "Ingrese el usuario de GitHub del repositorio (ej. ctrbts): "
+read GITHUB_USER
+if [ -z "$GITHUB_USER" ]; then
+    echo "Error: Debe ingresar un usuario de GitHub."
+    exit 1
+fi
+
 # --- Variables ---
 # Acceso por SSH
-REPO_URL="git@github.com:tu_usuario/setup-dev-env.git"
+REPO_URL="git@github.com:${GITHUB_USER}/setup-dev-env.git"
 #Descomentar si el repositorio es público
-#REPO_URL="https://github.com/tu_usuario/setup-dev-env.git"
+#REPO_URL="https://github.com/${GITHUB_USER}/setup-dev-env.git"
 TARGET_DIR="$DEV_BASE_DIR/setup-dev-env"
 
 echo "==> Asegurando que 'git' esté instalado..."

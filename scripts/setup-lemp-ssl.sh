@@ -41,11 +41,24 @@ fi
 
 echo "[i] Script ejecutado por el usuario '$SUDO_USER'."
 
+# --- Configuración Interactiva ---
+printf "Ingrese el nombre de dominio (ej. mi-sitio.com): "
+read DOMAIN_NAME
+if [ -z "$DOMAIN_NAME" ]; then
+    echo "Error: El nombre de dominio es requerido."
+    exit 1
+fi
+
+printf "Ingrese el email para notificaciones SSL: "
+read CERT_EMAIL
+if [ -z "$CERT_EMAIL" ]; then
+    echo "Error: El email es requerido."
+    exit 1
+fi
+
 # --- Variables ---
 APP_DIR="/var/www/app"
 WEB_ROOT="$APP_DIR/public"
-DOMAIN_NAME="tu_dominio.com"  # <--- TU DOMINIO REAL
-CERT_EMAIL="tu_email@ejemplo.com" # <--- Email para avisos de expiración SSL
 
 echo "--- Iniciando provisionamiento de Nginx/PHP/SSL ---"
 echo "  Dominio: $DOMAIN_NAME"
