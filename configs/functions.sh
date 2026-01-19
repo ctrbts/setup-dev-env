@@ -26,9 +26,15 @@ log_error() { echo -e "${RED}[ERROR] $1"; }
 
 # Función para actualizar la workstation
 update-workstation() {
+    printf "Ingrese el usuario de GitHub del repositorio (ej. ctrbts): "
+    read gh_user
+    if [ -z "$gh_user" ]; then
+        log_error "Error: Usuario de GitHub requerido."
+        return 1
+    fi
     log_info "Actualizando la workstation..."
     rm -rf "$DEV_BASE_DIR/setup-dev-env"
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/main/bootstrap.sh)" _ --dev-only
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/${gh_user}/setup-dev-env/main/bootstrap.sh)" _ --dev-only
 }
 
 # Función para ir al directorio de desarrollo
