@@ -26,7 +26,7 @@ log_error() { echo -e "${RED}[ERROR] $1"; }
 
 # Función para actualizar la workstation
 update-workstation() {
-    printf "Ingrese el usuario de GitHub del repositorio (ej. ctrbts): "
+    printf "Ingrese el usuario de GitHub del repositorio (ej. mi_usuario): "
     read gh_user
     if [ -z "$gh_user" ]; then
         log_error "Error: Usuario de GitHub requerido."

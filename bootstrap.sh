@@ -7,7 +7,7 @@ CURRENT_USER=$(whoami)
 DEV_BASE_DIR="$HOME/workspace/github.com/$CURRENT_USER"
 
 # --- Configuración Interactiva ---
-printf "Ingrese el usuario de GitHub del repositorio (ej. ctrbts): "
+printf "Ingrese el usuario de GitHub del repositorio (ej. mi_usuario): "
 read GITHUB_USER
 if [ -z "$GITHUB_USER" ]; then
     echo "Error: Debe ingresar un usuario de GitHub."
