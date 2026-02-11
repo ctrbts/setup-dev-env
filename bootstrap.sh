@@ -15,10 +15,10 @@ if [ -z "$GITHUB_USER" ]; then
 fi
 
 # --- Variables ---
-# Acceso por SSH
-REPO_URL="git@github.com:${GITHUB_USER}/setup-dev-env.git"
-#Descomentar si el repositorio es público
-#REPO_URL="https://github.com/${GITHUB_USER}/setup-dev-env.git"
+# Acceso por HTTPS (Recomendado para bootstrap)
+REPO_URL="https://github.com/ctrbts/setup-dev-env.git"
+# Descomentar si prefieres usar SSH (requiere llaves configuradas)
+# REPO_URL="git@github.com:ctrbts/setup-dev-env.git"
 TARGET_DIR="$DEV_BASE_DIR/setup-dev-env"
 
 echo "==> Asegurando que 'git' esté instalado..."
