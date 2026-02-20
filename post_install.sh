@@ -101,8 +101,8 @@ cleanup_previous_configs() {
     
     # Eliminar archivos de lista de repositorios
     sudo rm -f /etc/apt/sources.list.d/vscode.list \
-               /etc/apt/sources.list.d/vscode.sources \
-               /etc/apt/sources.list.d/serge-rider-ubuntu-dbeaver-ce-plucky.list \
+               /etc/apt/sources.list.d/antigravity.list \
+               /etc/apt/sources.list.d/dbeaver.list \
                /etc/apt/sources.list.d/google-chrome.list \
                /etc/apt/sources.list.d/mozilla.list \
                /etc/apt/sources.list.d/docker.list
@@ -110,12 +110,6 @@ cleanup_previous_configs() {
     # Eliminar llaves GPG antiguas
     sudo rm -f /usr/share/keyrings/microsoft.gpg
 
-    # Eliminar líneas conflictivas del archivo principal de sources.list
-    if [ -f /etc/apt/sources.list ]; then
-        sudo sed -i -E '/.*packages\.microsoft\.com\/repos\/code.*/d' /etc/apt/sources.list
-        sudo sed -i -E '/.*dl\.google\.com\/linux\/chrome\/deb.*/d' /etc/apt/sources.list
-        sudo sed -i -E '/.*download\.docker\.com\/linux\/ubuntu.*/d' /etc/apt/sources.list
-    fi
     _success "Limpieza de configuraciones previas completada."
 }
 
