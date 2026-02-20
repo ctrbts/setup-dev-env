@@ -4,18 +4,20 @@ set -e
 
 # Variables globales
 CURRENT_USER=$(whoami)
-DEV_BASE_DIR="$HOME/workspace/github.com/$CURRENT_USER"
 
 # --- Configuración Interactiva ---
-printf "Ingrese el usuario de GitHub del repositorio (ej. mi_usuario): "
-read GITHUB_USER
+# Permite que el script sea "one-shot" de forma ininterrumpida si GITHUB_USER se pasa como variable de entorno
 if [ -z "$GITHUB_USER" ]; then
-    echo "Error: Debe ingresar un usuario de GitHub."
-    exit 1
+    printf "Ingrese el usuario de GitHub para clonar el repositorio [ctrbts]: "
+    read INPUT_USER
+    GITHUB_USER="${INPUT_USER:-ctrbts}"
 fi
 
+DEV_BASE_DIR="$HOME/workspace/github.com/$GITHUB_USER"
+
 # --- Variables ---
-REPO_URL="git@github.com:ctrbts/setup-dev-env.git"
+# Usamos HTTPS para el clonado inicial ya que la máquina aún no tiene llaves SSH configuradas.
+REPO_URL="https://github.com/${GITHUB_USER}/setup-dev-env.git"
 TARGET_DIR="$DEV_BASE_DIR/setup-dev-env"
 
 echo "==> Asegurando que 'git' esté instalado..."

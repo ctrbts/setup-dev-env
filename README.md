@@ -1,32 +1,48 @@
-Para configurar una máquina nueva ejecute uno de los comandos de abajo. Esto descargará un pequeño script que clonará el repositorio y ejecutará la instalación.
+# Setup Dev Env
 
-## Instalación Estándar (Recomendado)
+Automatización para la configuración de entornos de desarrollo en máquinas nuevas Ubuntu.
 
-Este comando ejecuta la configuración completa pero **mantiene Snap** para máxima compatibilidad con versiones recientes de Ubuntu.
+Este repositorio está diseñado para ejecutarse como un **one-shot**. Con solo copiar y pegar un comando en la terminal, se descargará el script de inicialización (`bootstrap.sh`), se solicitarán permisos de administrador (te pedirá ingresar tu contraseña temporalmente para `sudo`), se clonará el repositorio localmente y se ejecutará la configuración completa sin depender de pasos manuales.
 
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/tu_usuario/setup-dev-env/main/bootstrap.sh)"
+## 🚀 Instalación Estándar (Recomendado)
 
-### Uso Avanzado
+Para iniciar la instalación, abre tu terminal y ejecuta el siguiente comando.
+*(Si hiciste un fork de este repositorio, cambia `ctrbts` por tu usuario de GitHub)*:
 
-Puedes pasar flags directamente al script de instalación para modificar su comportamiento.
+```bash
+GITHUB_USER="ctrbts" bash -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/main/bootstrap.sh)"
+```
 
-**Ejemplo 1: Instalación completa eliminando Snap**
+Este comando ejecuta la configuración completa pero **mantiene Snap** predeterminado para máxima compatibilidad con versiones recientes de Ubuntu.
 
-ADVERTENCIA: Solo usar si entiendes las implicaciones de eliminar `snapd` de tu sistema.
+## ⚙️ Uso Avanzado
 
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/tu_usuario/setup-dev-env/main/bootstrap.sh)" _ --all --remove-snap
+Puedes enviar opciones adicionales al comando pasando parámetros al final de este.
 
-**Ejemplo 2: Instalación solo de herramientas de desarrollo (sin Apps de escritorio y sin eliminar Snap)**
+### Instalación completa eliminando Snap
 
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/tu_usuario/setup-dev-env/main/bootstrap.sh)" _ --dev-only
+> ⚠️ **ADVERTENCIA:** Solo usa esta opción si entiendes las implicaciones de eliminar `snapd` de tu sistema.
 
-**Explicación del formato del comando:**
-El `_` después del script es un placeholder necesario para que `sh -c` asigne correctamente los argumentos (`--all`, `--remove-snap`, etc.) al script descargado.
+```bash
+GITHUB_USER="ctrbts" bash -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/main/bootstrap.sh)" _ --all --remove-snap
+```
+
+### Instalar solo herramientas de desarrollo
+
+Sin instalar flatpaks de escritorio y manteniendo Snap
+
+```bash
+GITHUB_USER="ctrbts" bash -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/main/bootstrap.sh)" _ --dev-only
+```
+
+> **💡 Explicación del comando:**
+>
+> - `GITHUB_USER="ctrbts"`: Define la variable de entorno de tu usuario para clonar el repositorio automáticamente sin hacer pausas e instalar en ese directorio de trabajo (`~/workspace/github.com/<usuario>/`).
+> - `bash -c "..." _`: El `_` es un placeholder necesario para que `bash -c` asigne correctamente los sufijos o argumentos (`--all`, `--dev-only`, etc.) a `$@` del script descargado en subshell.
 
 ## Scripts
 
 - [Aquí hay varios scripts](/scripts) que están diseñados para automatizar la instalación y configuración de herramientas y entornos necesarios para el desarrollo de software.
-
 
 ## Configuración para diferentes plataformas
 
