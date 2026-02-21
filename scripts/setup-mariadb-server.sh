@@ -56,7 +56,6 @@ echo "  Base de Datos: $DB_NAME"
 echo "  Usuario de BD: $DB_USER"
 echo "  IP de App (Permitida): $APP_SERVER_IP"
 echo "-----------------------------------------------------"
-sleep 3
 
 # --- 2. Actualización del Sistema ---
 echo "[+] Actualizando paquetes del sistema..."

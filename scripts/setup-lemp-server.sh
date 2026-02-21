@@ -56,7 +56,6 @@ echo "  Directorio de App (Base): $APP_DIR"
 echo "  Directorio de App (Web Root): $WEB_ROOT"
 echo "  Usando Nginx/PHP de los repositorios de Ubuntu..."
 echo "-----------------------------------------------------"
-sleep 3
 
 # --- 2. Actualización del Sistema ---
 echo "[+] Actualizando paquetes del sistema..."
