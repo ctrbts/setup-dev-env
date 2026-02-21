@@ -169,7 +169,8 @@ setup_apt_repos() {
 
     # Docker (con fallback a LTS)
     local ubuntu_codename
-    ubuntu_codename=$(. /etc/os-release && echo "$VERSION_CODENAME")
+    # ubuntu_codename=$(. /etc/os-release && echo "$VERSION_CODENAME")
+    ubuntu_codename="noble"
     
     if ! curl -fsSL "https://download.docker.com/linux/ubuntu/dists/$ubuntu_codename/" | grep -q "stable"; then
         _warning "No se encontró un repositorio de Docker para '$ubuntu_codename'. Usando fallback a 'noble' (LTS)."
