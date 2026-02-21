@@ -81,13 +81,6 @@ FLATPAK_APPS=(
     net.nokyan.Resources
 )
 
-ASDF_PLUGINS=(
-    python 
-    php 
-    nodejs
-    java
-)
-
 # --- Funciones de Utilidad ---
 _log() { echo -e "\n${BLUE}==> $1${NC}"; }
 _success() { echo -e "${GREEN}✅ $1${NC}"; }
@@ -222,64 +215,74 @@ setup_zsh() {
     # Activar plugins en .zshrc
     local zshrc_file="$USER_HOME/.zshrc"
     if [ -f "$zshrc_file" ]; then
-        sudo -u "$SUDO_USER" sed -i 's/^plugins=(git)$/plugins=(git common-aliases extract colored-man-pages zsh-autosuggestions zsh-syntax-highlighting asdf)/' "$zshrc_file"
+        sudo -u "$SUDO_USER" sed -i 's/^plugins=(git)$/plugins=(git common-aliases extract colored-man-pages zsh-autosuggestions zsh-syntax-highlighting)/' "$zshrc_file"
     fi
     _success "Zsh y plugins configurados."
 }
 
-# 06. Configura el entorno de desarrollo (Docker, asdf).
-setup_dev_environment() {
-    _log "Configurando entorno de desarrollo (Docker, asdf)"
-
-    # Docker Post-install
-    sudo usermod -aG docker "$SUDO_USER"
-    sudo systemctl enable --now docker.service
-
-    # asdf (versión Go con binario)
-    local asdf_data_dir="$USER_HOME/.asdf"
-    if ! command -v asdf &> /dev/null; then
-        _log "Instalando asdf (versión Go)..."
-        local asdf_version
-        asdf_version=$(curl -s "https://api.github.com/repos/asdf-vm/asdf/releases/latest" | grep -oP '"tag_name": "\K(v[0-9\.]+)')
-        local asdf_tarball="asdf-${asdf_version}-linux-amd64.tar.gz"
-
-        # https://github.com/asdf-vm/asdf/releases/download/v0.18.0/asdf-v0.18.0-linux-amd64.tar.gz
-        wget -qO "/tmp/$asdf_tarball" "https://github.com/asdf-vm/asdf/releases/download/$asdf_version/$asdf_tarball"
-        
-        sudo -u "$SUDO_USER" mkdir -p "$asdf_data_dir/bin"
-        sudo -u "$SUDO_USER" tar -xzf "/tmp/$asdf_tarball" -C "$asdf_data_dir/bin"
-        rm "/tmp/$asdf_tarball"
-        sudo chown -R "$SUDO_USER:$SUDO_USER" "$asdf_data_dir"
-        
-        # Configurar asdf en .zshrc
-        local zshrc_file="$USER_HOME/.zshrc"
-        if [ -f "$zshrc_file" ] && ! grep -q "ASDF_DATA_DIR" "$zshrc_file"; then
-            # Eliminar la configuración antigua si existe
-            sudo -u "$SUDO_USER" sed -i '/\. "$HOME\/\.asdf\/asdf\.sh"/d' "$zshrc_file"
-            # Añadir la nueva configuración
-            sudo -u "$SUDO_USER" tee -a "$zshrc_file" > /dev/null <<EOF
-
-# --- ASDF (Go Version) ---
-export ASDF_DATA_DIR=$asdf_data_dir
-export PATH="\$ASDF_DATA_DIR/shims:\$ASDF_DATA_DIR/bin:\$PATH"
-EOF
-        fi
-        _success "asdf instalado."
+# 06. Instala y configura Docker y herramientas de desarrollo.
+install_uv() {
+    _log "Instalando uv (Python)..."
+    if ! sudo -u "$SUDO_USER" env HOME="$USER_HOME" sh -c "command -v uv" &> /dev/null; then
+        sudo -u "$SUDO_USER" env HOME="$USER_HOME" sh -c "curl -LsSf https://astral.sh/uv/install.sh | sh"
+        _success "uv instalado."
     else
-        _warning "asdf ya está instalado. Omitiendo."
+        _warning "uv ya está instalado. Omitiendo."
     fi
-    
-    # Cargar asdf en la sesión actual para instalar plugins
-    export ASDF_DATA_DIR=$asdf_data_dir
-    export PATH="$ASDF_DATA_DIR/shims:$ASDF_DATA_DIR/bin:$PATH"
+}
 
-    # Instalar plugins
-    for plugin in "${ASDF_PLUGINS[@]}"; do
-        if ! sudo -u "$SUDO_USER" env ASDF_DATA_DIR="$asdf_data_dir" PATH="$asdf_data_dir/shims:$asdf_data_dir/bin:$PATH" asdf plugin list | grep -q "$plugin"; then
-            sudo -u "$SUDO_USER" env ASDF_DATA_DIR="$asdf_data_dir" PATH="$asdf_data_dir/shims:$asdf_data_dir/bin:$PATH" asdf plugin add "$plugin"
-        fi
-    done
-    _success "Docker y plugins de asdf configurados."
+install_fnm() {
+    _log "Instalando fnm (Node.js)..."
+    if ! sudo -u "$SUDO_USER" env HOME="$USER_HOME" sh -c "command -v fnm" &> /dev/null; then
+        # Instalamos en .local/bin para asegurar que esté en el PATH
+        sudo -u "$SUDO_USER" env HOME="$USER_HOME" sh -c "curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir \"$USER_HOME/.local/bin\" --skip-shell"
+        _success "fnm instalado."
+    else
+        _warning "fnm ya está instalado. Omitiendo."
+    fi
+}
+
+install_sdkman() {
+    _log "Instalando SDKMAN! (Java)..."
+    local sdkman_dir="$USER_HOME/.sdkman"
+    if [ ! -d "$sdkman_dir" ]; then
+        sudo -u "$SUDO_USER" env HOME="$USER_HOME" sh -c "curl -s \"https://get.sdkman.io\" | bash"
+        _success "SDKMAN! instalado."
+    else
+        _warning "SDKMAN! ya está instalado. Omitiendo."
+    fi
+}
+
+setup_runtimes() {
+    _log "Configurando entorno de desarrollo (Runtimes)"
+    
+    # Docker Post-install (siempre se ejecuta si está instalado)
+    if command -v docker &> /dev/null; then
+        sudo usermod -aG docker "$SUDO_USER"
+        sudo systemctl enable --now docker.service
+        _success "Docker configurado."
+    fi
+
+    echo ""
+    echo "--- Selección de Herramientas de Desarrollo ---"
+
+    # UV
+    read -p "¿Deseas instalar uv (Gestor de paquetes/proyectos Python ultra rápido)? [s/N]: " install_uv_opt
+    if [[ "$install_uv_opt" =~ ^[sS]$ ]]; then
+        install_uv
+    fi
+
+    # FNM
+    read -p "¿Deseas instalar fnm (Fast Node Manager)? [s/N]: " install_fnm_opt
+    if [[ "$install_fnm_opt" =~ ^[sS]$ ]]; then
+        install_fnm
+    fi
+
+    # SDKMAN
+    read -p "¿Deseas instalar SDKMAN! (Gestor para Java, Gradle, Maven, etc.)? [s/N]: " install_sdk_opt
+    if [[ "$install_sdk_opt" =~ ^[sS]$ ]]; then
+        install_sdkman
+    fi
 }
 
 # 10. Copia y configura los dotfiles personalizados.
@@ -352,7 +355,7 @@ main() {
     setup_apt_repos
     install_apt_packages
     setup_zsh
-    setup_dev_environment
+    setup_runtimes
     setup_dotfiles
 
     if [[ "$MODE" == "all" ]]; then
@@ -368,9 +371,7 @@ main() {
     echo -e "\n${YELLOW}--- Pasos Finales MUY IMPORTANTES ---${NC}"
     echo "1. Para que todos los cambios se apliquen correctamente,"
     echo -e "   necesitas ${GREEN}CERRAR SESIÓN Y VOLVER A INICIARLA${NC}."
-    echo "2. Una vez en la nueva sesión, puedes instalar las versiones de tus herramientas, por ejemplo:"
-    echo -e "   ${GREEN}asdf install python latest${NC}"
-    echo -e "   ${GREEN}asdf global python latest${NC}"
+    echo "2. Las herramientas uv, fnm y sdkman están listas para usar si las seleccionaste."
 }
 
 # --- Punto de Entrada del Script ---

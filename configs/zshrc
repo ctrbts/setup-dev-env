@@ -16,7 +16,6 @@ plugins=(
   colored-man-pages
   zsh-autosuggestions
   zsh-syntax-highlighting
-  asdf
 )
 
 # Cargar Oh My Zsh. Esto debe hacerse antes de las personalizaciones del usuario.
@@ -31,9 +30,18 @@ source "$ZSH/oh-my-zsh.sh"
 # Esta línea es fundamental para que la terminal encuentre todos los comandos.
 export PATH="/usr/local/bin:$HOME/.local/bin:$HOME/bin:$PATH"
 
-# --- ASDF (Gestor de Versiones) ---
-# Añade los shims y el binario de ASDF al PATH.
-export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$HOME/.asdf/bin:$PATH"
+# --- UV (Python) ---
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# --- FNM (Node.js) ---
+# Se asume que fnm está en ~/.local/bin que ya está en el PATH
+if command -v fnm &> /dev/null; then
+    eval "$(fnm env --use-on-cd)"
+fi
+
+# --- SDKMAN (Java) ---
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # Cargar funciones y alias personalizados desde archivos externos.
 # ¡Esto es una excelente práctica para mantener el .zshrc limpio!
