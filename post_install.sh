@@ -36,7 +36,6 @@ APT_ESSENTIALS=(
     flatpak 
     gnome-software-plugin-flatpak 
     gnome-shell-extensions 
-    gnome-shell-pomodoro 
     gnome-browser-connector 
     libssl-dev 
     zlib1g-dev 
