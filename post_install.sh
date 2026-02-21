@@ -73,12 +73,10 @@ APT_APPS=(
 )
 
 FLATPAK_APPS=(
-    org.videolan.VLC 
     org.gimp.GIMP 
     org.inkscape.Inkscape
     org.blender.Blender
     org.onlyoffice.desktopeditors
-    net.nokyan.Resources
 )
 
 # --- Funciones de Utilidad ---
