@@ -427,13 +427,26 @@ if confirm_install "UFW (Uncomplicated Firewall)"; then
         
         # Configurar Redis para aceptar conexiones remotas
         if [[ -f "/etc/redis/redis.conf" ]]; then
-          # Comentar la línea bind 127.0.0.1 para permitir todas las interfaces o especificar IP
-          sed -i 's/^bind 127.0.0.1/# bind 127.0.0.1/' /etc/redis/redis.conf
-          # Cambiar protected-mode a no
-          sed -i 's/protected-mode yes/protected-mode no/' /etc/redis/redis.conf
-          # Recomendar configurar una contraseña
-          echo "IMPORTANTE: Se recomienda configurar una contraseña para Redis editando /etc/redis/redis.conf"
-          echo "y estableciendo 'requirepass tu_contraseña_segura'."
+          echo "Para habilitar el acceso remoto, es OBLIGATORIO configurar una contraseña en Redis."
+          read -s -p "Establezca una contraseña para Redis: " redis_password
+          echo
+          while [[ -z "$redis_password" ]]; do
+            read -s -p "La contraseña no puede estar vacía. Por favor, establézcala: " redis_password
+            echo
+          done
+
+          # Configurar bind para permitir conexiones (usamos 0.0.0.0 para todas las interfaces)
+          sed -i 's/^bind 127.0.0.1/bind 0.0.0.0/' /etc/redis/redis.conf
+
+          # Configurar la contraseña (requirepass)
+          # Eliminar cualquier configuración previa de requirepass y añadir la nueva
+          sed -i '/^#\? \?requirepass/d' /etc/redis/redis.conf
+          echo "requirepass \"$redis_password\"" >> /etc/redis/redis.conf
+
+          # Asegurar que protected-mode esté en yes (aunque es el default)
+          sed -i 's/protected-mode no/protected-mode yes/' /etc/redis/redis.conf
+
+          echo "Redis configurado con contraseña y acceso remoto habilitado (restringido por UFW)."
         fi
       fi
     else
