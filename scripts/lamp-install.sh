@@ -111,23 +111,24 @@ if confirm_install "PHP"; then
     PHP_REPO_SOURCE=$(choose_repository_source "PHP")
 
     if [[ "$PHP_REPO_SOURCE" == "oficial" ]]; then
+        PHP_VERSIONS=("8.1" "8.2" "8.3")
         echo "Versiones disponibles de PHP (desde ppa:ondrej/php):"
-        echo "1) PHP 8.1"
-        echo "2) PHP 8.2"
-        echo "3) PHP 8.3 (Recomendado LTS)"
-        # Podrías añadir más o incluso intentar obtenerlas dinámicamente si fuera necesario.
-        read -p "Seleccione la versión de PHP a instalar (1-3) [3]: " php_version_option
-        php_version_option=${php_version_option:-3}
+        for i in "${!PHP_VERSIONS[@]}"; do
+            echo "$((i+1))) PHP ${PHP_VERSIONS[$i]}"
+        done
+        echo "$(( ${#PHP_VERSIONS[@]} + 1 ))) Otra (especificar manualmente)"
 
-        case $php_version_option in
-        1) PHP_VERSION_SELECTED="8.1" ;;
-        2) PHP_VERSION_SELECTED="8.2" ;;
-        3) PHP_VERSION_SELECTED="8.3" ;;
-        *)
+        read -p "Seleccione la versión de PHP a instalar (1-$(( ${#PHP_VERSIONS[@]} + 1 ))) [3]: " php_choice
+        php_choice=${php_choice:-3}
+
+        if [[ "$php_choice" -ge 1 && "$php_choice" -le "${#PHP_VERSIONS[@]}" ]]; then
+            PHP_VERSION_SELECTED=${PHP_VERSIONS[$((php_choice-1))]}
+        elif [[ "$php_choice" -eq $(( ${#PHP_VERSIONS[@]} + 1 )) ]]; then
+            read -p "Ingrese la versión de PHP (ej: 8.4): " PHP_VERSION_SELECTED
+        else
             PHP_VERSION_SELECTED="8.3"
-            echo "Opción no válida, se instalará PHP 8.3 por defecto."
-            ;;
-        esac
+            echo "Opción no válida, se instalará PHP $PHP_VERSION_SELECTED por defecto."
+        fi
 
         echo "Instalando PHP $PHP_VERSION_SELECTED y extensiones desde ppa:ondrej/php..."
         add-apt-repository ppa:ondrej/php -y
