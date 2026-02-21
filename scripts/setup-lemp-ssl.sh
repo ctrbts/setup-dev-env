@@ -65,7 +65,6 @@ echo "  Dominio: $DOMAIN_NAME"
 echo "  Email SSL: $CERT_EMAIL"
 echo "  Web Root: $WEB_ROOT"
 echo "-----------------------------------------------------"
-sleep 3
 
 # --- 2. Actualización del Sistema ---
 echo "[+] Actualizando paquetes del sistema..."
