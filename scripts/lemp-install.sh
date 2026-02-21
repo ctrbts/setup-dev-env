@@ -96,21 +96,23 @@ if confirm_install "PHP"; then
   
   if [[ "$php_repo" == "o" ]]; then
     # Preguntar sobre la versión de PHP a instalar (solo para repo oficial)
+    PHP_VERSIONS=("8.0" "8.1" "8.2" "8.3")
     echo "Versiones disponibles de PHP:"
-    echo "1) PHP 8.0"
-    echo "2) PHP 8.1" 
-    echo "3) PHP 8.2"
-    echo "4) PHP 8.3"
-    read -p "Seleccione la versión de PHP a instalar (1-4): " php_version
+    for i in "${!PHP_VERSIONS[@]}"; do
+      echo "$((i+1))) PHP ${PHP_VERSIONS[$i]}"
+    done
+    echo "$(( ${#PHP_VERSIONS[@]} + 1 ))) Otra (especificar manualmente)"
+
+    read -p "Seleccione la versión de PHP a instalar (1-$(( ${#PHP_VERSIONS[@]} + 1 ))): " php_choice
     
-    case $php_version in
-      1) php_ver="8.0" ;;
-      2) php_ver="8.1" ;;
-      3) php_ver="8.2" ;;
-      4) php_ver="8.3" ;;
-      *) php_ver="8.3"
-          echo "Opción no válida, se instalará PHP 8.3 por defecto." ;;
-    esac
+    if [[ "$php_choice" -ge 1 && "$php_choice" -le "${#PHP_VERSIONS[@]}" ]]; then
+      php_ver=${PHP_VERSIONS[$((php_choice-1))]}
+    elif [[ "$php_choice" -eq $(( ${#PHP_VERSIONS[@]} + 1 )) ]]; then
+      read -p "Ingrese la versión de PHP (ej: 8.4): " php_ver
+    else
+      php_ver="8.3"
+      echo "Opción no válida, se instalará PHP $php_ver por defecto."
+    fi
     
     # Instalar PHP desde el repositorio oficial
     echo "Instalando PHP $php_ver y extensiones desde el repositorio oficial..."
