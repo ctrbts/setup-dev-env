@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Detener el script si ocurre un error
+# Iniciar sesion con: gh auth login
+# Crear una clave publica con: gh auth refresh -h github.com -s admin:public_key
 set -e
 
 echo "=== Configuración SSH Automatizada con GitHub CLI ==="
