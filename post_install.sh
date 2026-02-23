@@ -21,16 +21,9 @@ REPO_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 # --- Listas de Paquetes (Fácil de modificar) ---
 APT_ESSENTIALS=(
     build-essential 
-    ca-certificates 
-    git 
-    curl 
-    wget 
     zsh
-    gnupg 
     ncdu 
-    file-roller 
-    unzip 
-    p7zip-full 
+    7zip 
     rar 
     gnome-sushi 
     flatpak 
@@ -39,18 +32,8 @@ APT_ESSENTIALS=(
     gnome-browser-connector 
     libssl-dev 
     zlib1g-dev 
-    libbz2-dev 
-    libreadline-dev 
     libsqlite3-dev 
-    llvm 
-    libncurses5-dev 
-    libncursesw5-dev 
-    xz-utils 
-    tk-dev 
-    libxml2-dev 
-    libxmlsec1-dev 
     libffi-dev 
-    liblzma-dev
 )
 
 APT_APPS=(
