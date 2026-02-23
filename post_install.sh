@@ -89,13 +89,14 @@ _warning() { echo -e "${YELLOW}⚠️ $1${NC}"; }
 cleanup_previous_configs() {
     _log "Limpiando configuraciones de repositorios previas"
     
-    # Eliminar archivos de lista de repositorios
-    sudo rm -f /etc/apt/sources.list.d/vscode.list \
-               /etc/apt/sources.list.d/antigravity.list \
-               /etc/apt/sources.list.d/dbeaver.list \
-               /etc/apt/sources.list.d/google-chrome.list \
-               /etc/apt/sources.list.d/mozilla.list \
-               /etc/apt/sources.list.d/docker.list
+    # Eliminar archivos de lista de repositorios (.list y .sources)
+    sudo rm -f /etc/apt/sources.list.d/vscode.list /etc/apt/sources.list.d/vscode.sources \
+               /etc/apt/sources.list.d/antigravity.list /etc/apt/sources.list.d/antigravity.sources \
+               /etc/apt/sources.list.d/dbeaver.list /etc/apt/sources.list.d/dbeaver.sources \
+               /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.sources \
+               /etc/apt/sources.list.d/mozilla.list /etc/apt/sources.list.d/mozilla.sources \
+               /etc/apt/sources.list.d/docker.list /etc/apt/sources.list.d/docker.sources \
+               /etc/apt/sources.list.d/github-cli.list /etc/apt/sources.list.d/github-cli.sources
 
     # Eliminar llaves GPG antiguas
     sudo rm -f /usr/share/keyrings/microsoft.gpg
@@ -112,8 +113,6 @@ remove_snap() {
     fi
 
     # Bucle que se ejecuta mientras queden snaps instalados.
-    # Intenta eliminar todos los snaps en cada pasada. Los que fallen por
-    # dependencias se eliminarán en pasadas posteriores.
     while [ -n "$(snap list | awk '!/^Name/{print $1}')" ]; do
         for snap in $(snap list | awk '!/^Name/{print $1}'); do
             sudo snap remove "$snap" 2>/dev/null || true
@@ -123,7 +122,7 @@ remove_snap() {
     sudo apt purge snapd -y
     sudo rm -rf "$USER_HOME/snap" /snap /var/snap /var/lib/snapd
     
-    cat <<EOF | sudo tee /etc/apt/preferences.d/no-snap.pref
+    cat <<EOF | sudo tee /etc/apt/preferences.d/no-snap.pref > /dev/null
 Package: snapd
 Pin: release *
 Pin-Priority: -1
@@ -131,54 +130,100 @@ EOF
     _success "Snapd eliminado y bloqueado."
 }
 
-# 03. Configura repositorios de terceros (Chrome, VSCode, Docker, DBeaver).
+# 03. Configura repositorios de terceros (Chrome, VSCode, Docker, DBeaver) en formato DEB822.
 setup_apt_repos() {
-    _log "Configurando repositorios APT de terceros"
+    _log "Configurando repositorios APT de terceros (Formato DEB822)"
     sudo install -m 0755 -d /etc/apt/keyrings
 
-    # Firefox Developer Edition (opcional)
-    # sudo add-apt-repository -y ppa:mozillateam/ppa
-    # sudo install -d -m 0755 /etc/apt/keyrings
+    # Firefox Developer Edition (Mozilla)
     wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
-    echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null
+    cat <<EOF | sudo tee /etc/apt/sources.list.d/mozilla.sources > /dev/null
+Types: deb
+URIs: https://packages.mozilla.org/apt
+Suites: mozilla
+Components: main
+Signed-By: /etc/apt/keyrings/packages.mozilla.org.asc
+EOF
+
     echo 'Package: *
-        Pin: origin packages.mozilla.org
-        Pin-Priority: 1000
-        ' | sudo tee /etc/apt/preferences.d/mozilla
+Pin: origin packages.mozilla.org
+Pin-Priority: 1000' | sudo tee /etc/apt/preferences.d/mozilla > /dev/null
 
     # Visual Studio Code
     curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --yes --dearmor -o /usr/share/keyrings/microsoft.gpg
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
+    cat <<EOF | sudo tee /etc/apt/sources.list.d/vscode.sources > /dev/null
+Types: deb
+URIs: https://packages.microsoft.com/repos/code
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/microsoft.gpg
+EOF
 
     # GitHub CLI
     wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null
     sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    cat <<EOF | sudo tee /etc/apt/sources.list.d/github-cli.sources > /dev/null
+Types: deb
+URIs: https://cli.github.com/packages
+Suites: stable
+Components: main
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/githubcli-archive-keyring.gpg
+EOF
 
     # Antigravity Google
     curl -fsSL https://us-central1-apt.pkg.dev/doc/repo-signing-key.gpg | sudo gpg --dearmor --yes -o /etc/apt/keyrings/antigravity-repo-key.gpg
-    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/antigravity-repo-key.gpg] https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev/ antigravity-debian main" | sudo tee /etc/apt/sources.list.d/antigravity.list > /dev/null
+    cat <<EOF | sudo tee /etc/apt/sources.list.d/antigravity.sources > /dev/null
+Types: deb
+URIs: https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev/
+Suites: antigravity-debian
+Components: main
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/antigravity-repo-key.gpg
+EOF
 
     # Google Chrome
     curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --yes --dearmor -o /etc/apt/keyrings/google-chrome.gpg
-    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+    cat <<EOF | sudo tee /etc/apt/sources.list.d/google-chrome.sources > /dev/null
+Types: deb
+URIs: http://dl.google.com/linux/chrome/deb/
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/google-chrome.gpg
+EOF
 
-    # DBeaver Community Edition (URL y formato corregidos)
+    # DBeaver Community Edition (Repositorio plano)
     curl -fsSL https://dbeaver.io/debs/dbeaver.gpg.key | sudo gpg --yes --dearmor -o /etc/apt/keyrings/dbeaver.gpg
-    echo "deb [signed-by=/etc/apt/keyrings/dbeaver.gpg] https://dbeaver.io/debs/dbeaver-ce /" | sudo tee /etc/apt/sources.list.d/dbeaver.list
+    cat <<EOF | sudo tee /etc/apt/sources.list.d/dbeaver.sources > /dev/null
+Types: deb
+URIs: https://dbeaver.io/debs/dbeaver-ce
+Suites: /
+Signed-By: /etc/apt/keyrings/dbeaver.gpg
+EOF
 
-    # Docker (con fallback a LTS)
+    # Docker
     local ubuntu_codename
-    # ubuntu_codename=$(. /etc/os-release && echo "$VERSION_CODENAME")
+    #ubuntu_codename=$(. /etc/os-release && echo "$VERSION_CODENAME")
     ubuntu_codename="noble"
     
+    # Validar si existe el repo para la versión actual. 
+    # Fallback temporal a la LTS actual (noble - 24.04) si Docker aún no da soporte al snapshot.
     if ! curl -fsSL "https://download.docker.com/linux/ubuntu/dists/$ubuntu_codename/" | grep -q "stable"; then
-        _warning "No se encontró un repositorio de Docker para '$ubuntu_codename'. Usando fallback a 'noble' (LTS)."
+        _warning "No se encontró un repositorio de Docker para '$ubuntu_codename'. Usando fallback a 'noble' (LTS 24.04)."
         ubuntu_codename="noble"
     fi
 
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --yes --dearmor -o /etc/apt/keyrings/docker.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $ubuntu_codename stable" | sudo tee /etc/apt/sources.list.d/docker.list
+    cat <<EOF | sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $ubuntu_codename
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.gpg
+EOF
 
     _success "Repositorios de terceros configurados."
 }
@@ -288,10 +333,10 @@ setup_dotfiles() {
     _log "Configurando dotfiles personalizados"
 
     # Agregar aqui archivos de configuración a copiar desde el repositorio
-    sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/functions.sh" "$USER_HOME/.functions.sh"
+    sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/functions.sh" "$USER_HOME/.functions.sh" 2>/dev/null || true
     
     # Reemplazar el .zshrc del usuario con nuestra versión personalizada
-    sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/zshrc" "$USER_HOME/.zshrc"
+    sudo -u "$SUDO_USER" cp "$REPO_DIR/configs/zshrc" "$USER_HOME/.zshrc" 2>/dev/null || true
 
     _success "Dotfiles copiados y .zshrc configurado."
 }
