@@ -47,6 +47,11 @@ ssh -T git@github.com -o StrictHostKeyChecking=no 2>&1 | grep -q "successfully a
 test_result=$?
 set -e
 
+# 7. Configurar usuario de git
+echo "Configurando usuario de git..."
+git config --global user.email "$user_email"
+git config --global user.name "$USER"
+
 echo ""
 if [ $test_result -eq 0 ]; then
     echo "=== ¡Proceso Finalizado con Éxito! ==="
