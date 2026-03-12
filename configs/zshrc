@@ -51,3 +51,6 @@ fi
 
 # Descomenta para establecer tu editor preferido.
 # export EDITOR='nvim'
+
+# opencode
+export PATH=/home/ctrbts/.opencode/bin:$PATH
