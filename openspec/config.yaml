@@ -1,0 +1,34 @@
+# openspec/config.yaml
+schema: spec-driven
+
+context: |
+  Stack tecnológico: Bash scripts para automatización de servidores (Ubuntu/Debian)
+  Arquitectura: Scripts modulares en scripts/, funciones compartidas en configs/functions.sh
+  Testing: No hay infraestructura de testing (scripts de verificación manual)
+  Estilo: shebang #!/bin/bash, set -e, sudo para comandos del sistema, eco con emojis
+
+rules:
+  change_naming: kebab-case
+  proposal:
+    - Incluir plan de rollback para cambios riesgoso
+    - Identificar scripts/paquetes afectados
+  specs:
+    - Usar formato Given/When/Then para escenarios
+    - Usar palabras clave RFC 2119 (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Incluir diagrama de flujo para flujos complejos
+    - Documentar decisiones con justificación
+    - "[!] Si proposal.md marca el riesgo como Medio/Alto, DEBES incluir estrategia de verificación."
+  tasks:
+    - Agrupar tareas por script o función afectada
+    - Usar numeración jerárquica (1.1, 1.2, etc.)
+    - Mantener tareas pequeñas, completables en una sesión
+  apply:
+    - "Seguir patrones de código existentes: shebang, set -e, permisos de ejecución +x"
+    - "Código Defensivo: Verificar permisos de root cuando sea necesario, mensajes claros"
+  verify:
+    - Verificar sintaxis con bash -n antes de aplicar
+    - Comparar implementación contra cada escenario de spec
+    - Probar en entorno de desarrollo antes de producción
+  archive:
+    - Advertir antes de fusionar deltas destructivos (eliminaciones grandes)

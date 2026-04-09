@@ -1,0 +1,29 @@
+change_name: macos-gnome-dock-customization
+current_phase: archive
+completed_phases:
+  - propose
+  - spec
+  - design
+  - tasks
+  - apply
+  - verify
+  - archive
+status: done
+session_summary: |
+  SDD CICLO COMPLETADO Y ARCHIVADO:
+  
+  1. Propose: Propuesta creada con análisis de riesgos
+  2. Spec: 7 requisitos con 9 escenarios (Given/When/Then)
+  3. Design: 3 decisiones de arquitectura documentadas
+  4. Tasks: 12 tareas específicas en 4 fases
+  5. Apply: Implementación completada
+  6. Verify: Reporte generado - ✅ APROBADO
+  7. Archive: Sincronizado a specs principales y movido al archivo
+  
+  Resultado: Nueva función setup_gnome_ui() en post_install.sh
+  - Posición inferior del Dock (BOTTOM)
+  - Centrado sin expansión (extend-height false)
+  - Botón apps a izquierda (show-apps-at-top true)
+  
+  Archivo: openspec/changes/archive/2026-04-09-macos-gnome-dock-customization/
+  Specs principales actualizadas: openspec/specs/gnome/spec.md

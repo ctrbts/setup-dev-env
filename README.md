@@ -17,7 +17,7 @@ Este comando ejecuta la configuración completa pero **mantiene Snap** predeterm
 
 ## Uso Avanzado
 
-Puedes enviar opciones adicionales al comando pasando parámetros al final de este.
+Puedes enviar opciones adicionales al comando pasando parámetros al final de este. Las banderas pueden combinarse.
 
 ### Instalación completa eliminando Snap
 
@@ -27,18 +27,32 @@ Puedes enviar opciones adicionales al comando pasando parámetros al final de es
 GITHUB_USER="ctrbts" bash -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/main/bootstrap.sh)" _ --all --remove-snap
 ```
 
-### Instalar solo herramientas de desarrollo
+### Instalación solo para oficina (Zero-Touch)
 
-Sin instalar flatpaks de escritorio y manteniendo Snap
+Entorno limpio y estandarizado sin herramientas de desarrollo. 100% desatendido.
 
 ```bash
-GITHUB_USER="ctrbts" bash -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/main/bootstrap.sh)" _ --dev-only
+GITHUB_USER="ctrbts" bash -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/main/bootstrap.sh)" _ --office
+```
+
+### Instalación de desarrollo sin Snap
+
+Stack de ingeniería completo (Zsh, Docker, VSCode, DBeaver, runtimes)
+
+```bash
+GITHUB_USER="ctrbts" bash -c "$(curl -fsSL https://raw.githubusercontent.com/ctrbts/setup-dev-env/main/bootstrap.sh)" _ --dev --remove-snap
 ```
 
 > **Explicación del comando:**
 >
 > - `GITHUB_USER="ctrbts"`: Define la variable de entorno de tu usuario para clonar el repositorio automáticamente sin hacer pausas e instalar en ese directorio de trabajo (`~/workspace/github.com/<usuario>/`).
-> - `bash -c "..." _`: El `_` es un placeholder necesario para que `bash -c` asigne correctamente los sufijos o argumentos (`--all`, `--dev-only`, etc.) a `$@` del script descargado en subshell.
+> - `bash -c "..." _`: El `_` es un placeholder necesario para que `bash -c` asigne correctamente los sufijos o argumentos (`--dev`, `--office`, `--all`, `--remove-snap`) a `$@` del script descargado en subshell.
+>
+> **Banderas disponibles:**
+> - `--dev`: Stack de ingeniería (Zsh, Docker, VSCode, DBeaver, runtimes interactivos)
+> - `--office`: Stack de oficina (OnlyOffice, Zoom, Spotify) - 100% zero-touch, Bash estándar
+> - `--all`: Ambos perfiles (equivalente a `--dev --office`, es el default)
+> - `--remove-snap`: Erradica Snapd del sistema
 
 ## Scripts
 

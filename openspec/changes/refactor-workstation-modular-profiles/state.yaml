@@ -1,0 +1,25 @@
+change_name: refactor-workstation-modular-profiles
+current_phase: verify
+completed_phases:
+  - propose
+  - spec
+  - design
+  - tasks
+  - apply
+  - verify
+proposal_created: true
+proposal_summary: Refactorizar post_install.sh para soportar perfiles combinables (--dev, --office)
+specs_created: true
+specs_summary: "Specs delta con requisitos AGREGADOS: parseo de banderas combinables, comportamiento por defecto, topología de paquetes separados, ejecución zero-touch para Office, Zsh condicional, copia condicional de dotfiles. MODIFICADOS: parseo de argumentos, arrays de paquetes. ELIMINADOS: instalación interactiva de runtimes, Zsh obligatorio."
+design_created: true
+design_summary: "Decisiones: variables booleanas, arrays separados por perfil, default a --all, zero-touch guard en setup_runtimes, condicionales en setup_zsh/dotfiles. Flujo de datos documentado. Archivos afectados: post_install.sh modificado."
+tasks_created: true
+tasks_summary: "6 fases: (1) Arrays separados, (2) Parseo de argumentos, (3) Condicionales de perfil, (4) Zero-touch setup_runtimes, (5) Flatpaks por perfil, (6) Verificación manual. Total: 19 tareas."
+apply_summary: "post_install.sh refactorizado: arrays separados por perfil (APT_BASE, APT_DEV, APT_OFFICE), parseo de booleanos con --dev/--office/--all/--remove-snap, setup_zsh/runtimes/dotfiles condicional a INSTALL_DEV, flatpaks por perfil, setup_runtimes zero-touch con guard."
+verify_summary: "Verificación completada: sintaxis válida (bash -n), 12/12 requisitos implementados, coherencia con diseño verificada. Veredicto: APROBADO."
+scope_summary: "Dentro: parseo de argumentos, arrays separados por perfil, condicionales, setup_runtimes zero-touch. Fuera: nuevas funcionalidades, testing"
+approach_summary: Refactorización del parseo + reorganización de arrays + condicionales por perfil
+status: verify_completed
+session_summary: "Verificación completada con éxito. post_install.sh refactorizado con perfiles --dev/--office combinables. Estado: APROBADO."
+created_at: "2026-04-09T00:00:00Z"
+updated_at: "2026-04-09T00:00:00Z"
