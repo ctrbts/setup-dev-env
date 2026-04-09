@@ -60,7 +60,7 @@ APT_DEV=(
 
 # Office: Solo se instala con --office
 APT_OFFICE=(
-    onlyoffice-desktopeditors
+    #onlyoffice-desktopeditors
 )
 
 # Flatpaks: Instalados con perfil Office
