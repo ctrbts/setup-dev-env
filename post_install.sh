@@ -18,47 +18,62 @@ USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
 # Asume que el script se ejecuta desde la raíz del repositorio clonado
 REPO_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-# --- Listas de Paquetes (Fácil de modificar) ---
-APT_ESSENTIALS=(
-    build-essential 
-    zsh
-    ncdu 
-    7zip 
-    rar 
-    gnome-sushi 
-    flatpak 
-    gnome-software-plugin-flatpak 
-    gnome-shell-extensions 
-    gnome-browser-connector 
-    libssl-dev 
-    zlib1g-dev 
-    libsqlite3-dev 
-    libffi-dev 
+# --- Listas de Paquetes por Perfil ---
+# Base: Siempre se instala (core del sistema)
+APT_BASE=(
+    build-essential
+    ncdu
+    7zip
+    rar
+    gnome-sushi
+    flatpak
+    gnome-software-plugin-flatpak
+    gnome-shell-extensions
+    gnome-browser-connector
+    libssl-dev
+    zlib1g-dev
+    libsqlite3-dev
+    libffi-dev
+    gnome-tweaks
+    gnome-boxes
+    curl
+    git
 )
 
-APT_APPS=(
-    google-chrome-stable 
-    gnome-boxes 
-    gnome-tweaks 
-    sqlitebrowser 
-    dbeaver-ce 
+# Dev: Solo se instala con --dev
+APT_DEV=(
+    zsh
+    google-chrome-stable
+    dbeaver-ce
     code
     gh
-    antigravity 
-    docker-ce 
-    docker-ce-cli 
-    containerd.io 
-    docker-buildx-plugin 
+    antigravity
+    docker-ce
+    docker-ce-cli
+    containerd.io
+    docker-buildx-plugin
     docker-compose-plugin
     firefox-devedition
     firefox-devedition-l10n-es-ar
+    sqlitebrowser
 )
 
-FLATPAK_APPS=(
-    org.gimp.GIMP 
+# Office: Solo se instala con --office
+APT_OFFICE=(
+    onlyoffice-desktopeditors
+)
+
+# Flatpaks: Instalados con perfil Office
+FLATPAK_OFFICE=(
+    org.onlyoffice.desktopeditors
+    com.spotify.Client
+    us.zoom.Zoom
+)
+
+FLATPAK_DEV=(
+    org.gimp.GIMP
     org.inkscape.Inkscape
     org.blender.Blender
-    org.onlyoffice.desktopeditors
 )
 
 # --- Funciones de Utilidad ---
@@ -211,13 +226,28 @@ EOF
     _success "Repositorios de terceros configurados."
 }
 
-# 04. Instala todos los paquetes desde APT.
+# 04. Instala paquetes desde APT según perfiles activos.
 install_apt_packages() {
-    _log "Instalando paquetes esenciales y software desde APT"
+    _log "Instalando paquetes APT por perfil"
     sudo apt update
-    sudo DEBIAN_FRONTEND=noninteractive apt install -y "${APT_ESSENTIALS[@]}"
-    sudo DEBIAN_FRONTEND=noninteractive apt install -y "${APT_APPS[@]}"
-    _success "Todos los paquetes APT instalados."
+
+    # Base: siempre se instala
+    _log "  → Instalando paquetes Base..."
+    sudo DEBIAN_FRONTEND=noninteractive apt install -y "${APT_BASE[@]}"
+
+    # Dev: solo con perfil activo
+    if [ "$INSTALL_DEV" = true ]; then
+        _log "  → Instalando paquetes de Desarrollo..."
+        sudo DEBIAN_FRONTEND=noninteractive apt install -y "${APT_DEV[@]}"
+    fi
+
+    # Office: solo con perfil activo
+    if [ "$INSTALL_OFFICE" = true ]; then
+        _log "  → Instalando paquetes de Oficina..."
+        sudo DEBIAN_FRONTEND=noninteractive apt install -y "${APT_OFFICE[@]}"
+    fi
+
+    _success "Paquetes APT instalados por perfil."
 }
 
 # 05. Configura Zsh, Oh My Zsh y los plugins.
@@ -280,7 +310,12 @@ install_sdkman() {
 }
 
 setup_runtimes() {
-    _log "Configurando entorno de desarrollo (Runtimes)"
+    # Zero-touch: si no hay perfil Dev, salir inmediatamente
+    if [ "$INSTALL_DEV" != true ]; then
+        return
+    fi
+
+    _log "Configurando entorno de desarrollo (Runtimes - Zero-Touch)"
     
     # Docker Post-install (siempre se ejecuta si está instalado)
     if command -v docker &> /dev/null; then
@@ -290,25 +325,16 @@ setup_runtimes() {
     fi
 
     echo ""
-    echo "--- Selección de Herramientas de Desarrollo ---"
+    echo "--- Instalando Herramientas de Desarrollo (Automático) ---"
 
-    # UV
-    read -p "¿Deseas instalar uv (Gestor de paquetes/proyectos Python ultra rápido)? [s/N]: " install_uv_opt
-    if [[ "$install_uv_opt" =~ ^[sS]$ ]]; then
-        install_uv
-    fi
+    # UV - instalación automática sin prompts
+    install_uv
 
-    # FNM
-    read -p "¿Deseas instalar fnm (Fast Node Manager)? [s/N]: " install_fnm_opt
-    if [[ "$install_fnm_opt" =~ ^[sS]$ ]]; then
-        install_fnm
-    fi
+    # FNM - instalación automática sin prompts
+    install_fnm
 
-    # SDKMAN
-    read -p "¿Deseas instalar SDKMAN! (Gestor para Java, Gradle, Maven, etc.)? [s/N]: " install_sdk_opt
-    if [[ "$install_sdk_opt" =~ ^[sS]$ ]]; then
-        install_sdkman
-    fi
+    # SDKMAN - instalación automática sin prompts
+    install_sdkman
 }
 
 # 10. Copia y configura los dotfiles personalizados.
@@ -324,12 +350,55 @@ setup_dotfiles() {
     _success "Dotfiles copiados y .zshrc configurado."
 }
 
-# 20. Instala aplicaciones GUI vía Flatpak.
-install_flatpaks() {
-    _log "Instalando aplicaciones GUI desde Flatpak"
+# 07. Configura la personalización del GNOME Dock (estilo macOS).
+# Prerequisito: Extensión Dash to Dock debe estar instalada.
+setup_gnome_ui() {
+    _log "Configurando GNOME Dock (estilo macOS)"
+    
+    # Verificar que la extensión Dash to Dock esté instalada
+    local extension_check
+    extension_check=$(sudo -u "$SUDO_USER" dbus-launch gsettings get org.gnome.shell.extensions.dash-to-dock dock-position 2>/dev/null || echo "not-installed")
+    
+    if [ "$extension_check" = "not-installed" ]; then
+        _warning "Dash to Dock no está instalado. Omitiendo configuración del Dock."
+        return
+    fi
+    
+    # Configurar posición inferior
+    sudo -u "$SUDO_USER" dbus-launch gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'BOTTOM'
+    
+    # Configurar centrado (sin expansión a bordes)
+    sudo -u "$SUDO_USER" dbus-launch gsettings set org.gnome.shell.extensions.dash-to-dock extend-height false
+    
+    # Configurar botón de aplicaciones a la izquierda
+    sudo -u "$SUDO_USER" dbus-launch gsettings set org.gnome.shell.extensions.dash-to-dock show-apps-at-top true
+    
+    _success "GNOME Dock configurado estilo macOS."
+}
+
+# 20. Instala aplicaciones GUI vía Flatpak por perfil.
+install_flatpaks_dev() {
+    # Solo se instala si perfil Dev está activo
+    if [ "$INSTALL_DEV" != true ]; then
+        return
+    fi
+
+    _log "Instalando aplicaciones Dev desde Flatpak"
     sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    sudo flatpak install -y --noninteractive flathub "${FLATPAK_APPS[@]}"
-    _success "Aplicaciones Flatpak instaladas."
+    sudo flatpak install -y --noninteractive flathub "${FLATPAK_DEV[@]}"
+    _success "Flatpaks Dev instalados."
+}
+
+install_flatpaks_office() {
+    # Solo se instala si perfil Office está activo
+    if [ "$INSTALL_OFFICE" != true ]; then
+        return
+    fi
+
+    _log "Instalando aplicaciones Office desde Flatpak"
+    sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    sudo flatpak install -y --noninteractive flathub "${FLATPAK_OFFICE[@]}"
+    _success "Flatpaks Office instalados."
 }
 
 # --- Función Principal que orquesta la ejecución ---
@@ -342,28 +411,60 @@ main() {
     _log "Actualizando paquetes del sistema"
     sudo apt update && sudo apt upgrade -y
 
-    # Inicializar variables para los flags
-    MODE="all"
+    # Inicializar variables booleanas para perfiles
+    INSTALL_DEV=false
+    INSTALL_OFFICE=false
     REMOVE_SNAP=false
 
-    # Parsear los argumentos de línea de comandos
-    for arg in "$@"; do
-        case $arg in
-            --dev-only)
-            MODE="dev"
-            shift # Quitar --dev-only de la lista de argumentos
-            ;;
-            --remove-snap)
-            REMOVE_SNAP=true
-            shift # Quitar --remove-snap de la lista de argumentos
-            ;;
-            *)
-            # Argumento desconocido, se puede ignorar o manejar como error
-            ;;
-        esac
-    done
-    
-    _log "Iniciando configuración de la workstation en modo: $MODE"
+    # Parsear argumentos de línea de comandos
+    if [ $# -eq 0 ]; then
+        # Sin argumentos: instalar ambos perfiles (default --all)
+        INSTALL_DEV=true
+        INSTALL_OFFICE=true
+    else
+        for arg in "$@"; do
+            case $arg in
+                --dev)
+                INSTALL_DEV=true
+                ;;
+                --office)
+                INSTALL_OFFICE=true
+                ;;
+                --all)
+                INSTALL_DEV=true
+                INSTALL_OFFICE=true
+                ;;
+                --remove-snap)
+                REMOVE_SNAP=true
+                ;;
+                --help|-h)
+                echo "Uso: $0 [OPCIONES]"
+                echo "Opciones:"
+                echo "  --dev          Instalar entorno de desarrollo"
+                echo "  --office       Instalar entorno de oficina"
+                echo "  --all         Instalar ambos perfiles (default si no hay args)"
+                echo "  --remove-snap  Eliminar Snapd del sistema"
+                echo "  --help        Mostrar esta ayuda"
+                echo "Ejemplos:"
+                echo "  $0              # Instalar todo (default)"
+                echo "  $0 --dev         # Solo Dev"
+                echo "  $0 --office      # Solo Oficina"
+                echo "  $0 --dev --office --remove-snap  # Combinado con limpieza"
+                exit 0
+                ;;
+                *)
+                # Ignorar argumentos desconocidos
+                ;;
+            esac
+        done
+    fi
+
+    # Mostrar perfiles activos
+    _log "Perfiles activos:"
+    [ "$INSTALL_DEV" = true ] && _log "  ✓ Desarrollo (--dev)"
+    [ "$INSTALL_OFFICE" = true ] && _log "  ✓ Oficina (--office)"
+    [ "$INSTALL_DEV" = false ] && [ "$INSTALL_OFFICE" = false ] && _warning " Ningún perfil activo - no se instalará nada"
+
     if [ "$REMOVE_SNAP" = true ]; then
         _warning "La opción --remove-snap está activa. Se procederá a eliminar Snapd."
     fi
@@ -380,24 +481,44 @@ main() {
 
     setup_apt_repos
     install_apt_packages
-    setup_zsh
-    setup_runtimes
-    setup_dotfiles
 
-    if [[ "$MODE" == "all" ]]; then
-        install_flatpaks
+    # Instalar perfil Dev condicionalmente
+    if [ "$INSTALL_DEV" = true ]; then
+        setup_zsh
+        setup_runtimes
+        install_flatpaks_dev
     fi
+
+    # Instalar perfil Office condicionalmente
+    if [ "$INSTALL_OFFICE" = true ]; then
+        install_flatpaks_office
+    fi
+
+    # Setup dotfiles solo con perfil Dev
+    if [ "$INSTALL_DEV" = true ]; then
+        setup_dotfiles
+    fi
+
+    # Configuración de GNOME UI (para todos los perfiles)
+    setup_gnome_ui
 
     # Limpieza final
     _log "Limpiando la instalación"
     sudo apt autoremove -y && sudo apt autoclean
 
     # Mensajes finales
-    echo -e "\n\n${GREEN}✅ ¡Configuración de la Workstation completada! ✅${NC}"
+    echo -e "\n\n${GREEN}✅ ¡Configuración de Workstation completada! ✅${NC}"
     echo -e "\n${YELLOW}--- Pasos Finales MUY IMPORTANTES ---${NC}"
     echo "1. Para que todos los cambios se apliquen correctamente,"
     echo -e "   necesitas ${GREEN}CERRAR SESIÓN Y VOLVER A INICIARLA${NC}."
-    echo "2. Las herramientas uv, fnm y sdkman están listas para usar si las seleccionaste."
+    
+    if [ "$INSTALL_DEV" = true ]; then
+        echo "2. Las herramientas uv, fnm y sdkman están listas para usar."
+    fi
+    
+    if [ "$INSTALL_OFFICE" = true ] && [ "$INSTALL_DEV" = false ]; then
+        echo "2. Entorno de oficina configurado sin intervención."
+    fi
 }
 
 # --- Punto de Entrada del Script ---

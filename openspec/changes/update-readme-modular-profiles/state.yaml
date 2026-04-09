@@ -1,0 +1,25 @@
+change_name: update-readme-modular-profiles
+current_phase: verify
+completed_phases:
+  - propose
+  - spec
+  - design
+  - tasks
+  - apply
+  - verify
+proposal_created: true
+proposal_summary: Actualizar README.md para reflejar perfiles modulares (--dev, --office, --all, --remove-snap)
+specs_created: true
+specs_summary: "Specs delta con requisitos AGREGADOS: documentación de flags combinables, ejemplos de código. MODIFICADOS: eliminación de --dev-only, actualización de ejemplos."
+design_created: true
+design_summary: "Edición directa de README.md, mantener estructura, actualizar descripciones de perfiles, formato de ejemplos consistente."
+tasks_created: true
+tasks_summary: "4 fases: (1) Ejemplos de código, (2) Explicaciones, (3) Verificación, (4) Limpieza. Total: 9 tareas."
+apply_summary: "README.md actualizado: nuevos ejemplos --office y --dev --remove-snap, explicación de flags, documentación de --dev/--office/--all/--remove-snap. Sin referencias a --dev-only."
+verify_summary: "Verificación completada: 8/8 requisitos implementados, 0 referencias a --dev-only, veredicto APROBADO."
+scope_summary: "Dentro: eliminar --dev-only, documentar nuevos flags, actualizar ejemplos. Fuera: otras secciones, enlaces."
+approach_summary: Edición directa de README.md
+status: verify_completed
+session_summary: "README.md actualizado y verificado. Fast-Forward SDD completado."
+created_at: "2026-04-09T00:00:00Z"
+updated_at: "2026-04-09T00:00:00Z"
