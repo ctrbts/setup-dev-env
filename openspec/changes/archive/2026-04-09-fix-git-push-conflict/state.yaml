@@ -1,0 +1,20 @@
+change: fix-git-push-conflict
+started_at: "2026-04-09T17:30:00"
+last_updated: "2026-04-09T17:30:00"
+current_phase: apply
+status: active
+completed_phases:
+  - explore
+  - tasks
+pending_phases:
+  - apply
+  - verify
+  - archive
+blocked: false
+blocked_reason: null
+session_summary: |
+  - Fase actual: apply
+  - Estado: active
+  - Progreso: Resolviendo conflicto mediante skip
+  - Última acción: Usuario aprobó omitir el commit conflictivo
+  - next_recommended: /sdd-verify
